@@ -199,12 +199,31 @@ var IntroState = {
       this.nextDelay,
       function () {
         this.nextButton.visible = true;
+        if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
       },
       this
     );
 
     // Mute button
     createMuteButton(this);
+
+    // --- TTS integration: register gather function and speak first subscene if enabled ---
+    this.getIntroVisibleText = () => {
+      const visibleTexts = [];
+      if (this.speechText1 && this.speechText1.visible) visibleTexts.push(this.speechText1.text);
+      if (this.speechText2 && this.speechText2.visible) visibleTexts.push(this.speechText2.text);
+      if (this.speechText3_1 && this.speechText3_1.visible) visibleTexts.push(this.speechText3_1.text);
+      if (this.speechText3_2 && this.speechText3_2.visible) visibleTexts.push(this.speechText3_2.text);
+      if (this.speechText4_1 && this.speechText4_1.visible) visibleTexts.push(this.speechText4_1.text);
+      if (this.speechText4_2 && this.speechText4_2.visible) visibleTexts.push(this.speechText4_2.text);
+      if (this.speechText5 && this.speechText5.visible) visibleTexts.push(this.speechText5.text);
+      return visibleTexts.join(' ');
+    };
+
+    if (window.TTSManager) {
+      window.TTSManager.setGatherTextFn(this.getIntroVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+    }
   },
   update: function () {
     updateCloudSprites(this);
@@ -265,6 +284,8 @@ var IntroState = {
           this.nextDelay,
           function () {
             this.nextButton.visible = true;
+            // Speak this subscene if TTS enabled
+            if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
           },
           this
         );
@@ -293,6 +314,7 @@ var IntroState = {
           this.nextDelay,
           function () {
             this.nextButton.visible = true;
+            if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
           },
           this
         );
@@ -320,6 +342,7 @@ var IntroState = {
           this.nextDelay,
           function () {
             this.nextButton.visible = true;
+            if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
           },
           this
         );
@@ -339,6 +362,7 @@ var IntroState = {
           this.nextDelay,
           function () {
             this.nextButton.visible = true;
+            if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
           },
           this
         );

@@ -48,9 +48,13 @@
     <script type="text/javascript" src="js/scenes/ff/FFIntro.js"></script>
     <script type="text/javascript" src="js/scenes/ff/FFGame.js"></script>
     <script type="text/javascript" src="js/scenes/ff/FFScore.js"></script>
+    <!-- TTS: text-to-speech manager and toggle -->
+    <script type="text/javascript" src="js/tts.js"></script>
   </head>
   <body>
     <div id="gameDiv"></div>
     <div id="orientation"></div>
+    <!-- TTS toggle for accessibility -->
+    <button id="tts-toggle" role="switch" aria-pressed="false" aria-label="Toggle text to speech" style="position:fixed;right:12px;bottom:12px;z-index:2147483647;pointer-events:auto;padding:8px 10px;border-radius:6px;background:#fff;border:1px solid #ccc;">🔊 TTS: Off</button>
   </body>
 </html>
