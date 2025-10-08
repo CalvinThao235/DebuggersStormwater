@@ -1,7 +1,7 @@
 "use strict";
 
 var FFGameState = {
-  preload: function () {},
+  preload: function () { },
   create: function () {
     // Set Restart Point
     RestartState = "FFGameState";
@@ -289,7 +289,7 @@ var FFGameState = {
     // Mute Button
     createMuteButton(this);
   },
-  update: function () {},
+  update: function () { },
   setOptionsClickable: function (clickable) {
     for (var i = 0; i < this.optionSprites.length; ++i) {
       if (this.optionSprites[i].enabled) {
@@ -329,8 +329,8 @@ var FFGameState = {
         ? data.wrong.correct
         : data.wrong.wrong
       : correct
-      ? data.correct.correct
-      : data.correct.wrong;
+        ? data.correct.correct
+        : data.correct.wrong;
 
     this.resultsBoxSprite.loadTexture(
       correct ? "ff_correct_box" : "ff_oops_box"
