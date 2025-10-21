@@ -89,6 +89,62 @@ var PPQuestionState = {
 
     // Play music
     AudioManager.playSong("pp_music", this);
+
+    // --- TTS integration ---
+    // Helper: extract a short label from an option for TTS
+    const _shortLabelFromOption = (opt) => {
+      try {
+        // Prefer an explicit label/alt if present
+        if (opt.label) return opt.label;
+        // Prefer the resultUpperText as a short summary
+        if (opt.resultUpperText) {
+          // take first sentence or up to 10 words
+          const txt = opt.resultUpperText.replace(/\n+/g, ' ').trim();
+          const sentenceMatch = txt.match(/^(.*?\.|$)/);
+          if (sentenceMatch && sentenceMatch[0].trim()) {
+            const sentence = sentenceMatch[0].replace(/\.$/, '').trim();
+            const words = sentence.split(/\s+/);
+            return words.slice(0, 10).join(' ') + (words.length > 10 ? '...' : '');
+          }
+          return txt.split(/\s+/).slice(0, 10).join(' ');
+        }
+        // Fallback: sanitize asset name (e.g., 'pp_1_1a' -> 'pp 1 1 a')
+        if (opt.name) {
+          let s = opt.name.replace(/[_-]+/g, ' ');
+          // try to remove common prefixes like pp_ or ff_
+          s = s.replace(/^pp\s+|^ff\s+|^ffimage\s+|^image\s+/i, '');
+          return s;
+        }
+      } catch (e) {}
+      return 'option';
+    };
+
+    this.getPPQuestionVisibleText = () => {
+      const texts = [];
+      try {
+        // Provide a short instruction rather than an asset name
+        texts.push('Choose an option');
+        for (var i = 0; i < options.length; ++i) {
+          const label = _shortLabelFromOption(options[i]);
+          texts.push('Option ' + (i + 1) + ': ' + label);
+        }
+      } catch (e) {}
+      return texts.join(' - ');
+    };
+
+    const registerTTS = () => {
+      if (!window.TTSManager) return;
+      window.TTSManager.setGatherTextFn(this.getPPQuestionVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+      this._ttsToggleHandler = (e) => {
+        if (e && e.detail && e.detail.enabled) window.TTSManager.speakCurrentText();
+      };
+      window.TTSManager.on && window.TTSManager.on('tts-toggle', this._ttsToggleHandler);
+    };
+
+    if (window.TTSManager) registerTTS();
+    else window.addEventListener('tts-ready', registerTTS, { once: true });
+    // --- end TTS integration ---
   },
   update: function () {},
 };

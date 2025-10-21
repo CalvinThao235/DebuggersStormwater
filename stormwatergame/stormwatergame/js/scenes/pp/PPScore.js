@@ -96,6 +96,22 @@ var PPScoreState = {
 
     // Audio
     AudioManager.playSong("results_music", this);
+
+    // --- TTS integration ---
+    this.getPPScoreVisibleText = () => {
+      try {
+        return this.scoreText && this.scoreText.text ? this.scoreText.text : '';
+      } catch (e) { return ''; }
+    };
+    const registerTTS = () => {
+      if (!window.TTSManager) return;
+      window.TTSManager.setGatherTextFn(this.getPPScoreVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+      this._ttsToggleHandler = (e) => { if (e && e.detail && e.detail.enabled) window.TTSManager.speakCurrentText(); };
+      window.TTSManager.on && window.TTSManager.on('tts-toggle', this._ttsToggleHandler);
+    };
+    if (window.TTSManager) registerTTS(); else window.addEventListener('tts-ready', registerTTS, { once: true });
+    // --- end TTS integration ---
   },
   update: function () {
     updateCloudSprites(this);

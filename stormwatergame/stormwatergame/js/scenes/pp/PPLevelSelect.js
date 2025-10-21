@@ -112,6 +112,20 @@ var PPLevelSelectState = {
 
     // Audio (if reset)
     AudioManager.playSong("title_music", this);
+
+    // --- TTS integration ---
+    this.getPPLevelSelectVisibleText = () => {
+      try { return this.speechText && this.speechText.text ? this.speechText.text : ''; } catch (e) { return ''; }
+    };
+    const registerTTS = () => {
+      if (!window.TTSManager) return;
+      window.TTSManager.setGatherTextFn(this.getPPLevelSelectVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+      this._ttsToggleHandler = (e) => { if (e && e.detail && e.detail.enabled) window.TTSManager.speakCurrentText(); };
+      window.TTSManager.on && window.TTSManager.on('tts-toggle', this._ttsToggleHandler);
+    };
+    if (window.TTSManager) registerTTS(); else window.addEventListener('tts-ready', registerTTS, { once: true });
+    // --- end TTS integration ---
   },
   update: function () {
     updateCloudSprites(this);

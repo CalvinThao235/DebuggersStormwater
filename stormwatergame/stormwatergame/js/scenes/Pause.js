@@ -85,6 +85,24 @@ var PauseState = {
       .yoyo(true, 0)
       .loop(true);
 
+    // Accessibility / Settings Button (opens global accessibility settings panel)
+    this.settingsButton = this.add.button(
+      0.6 * WIDTH,
+      0.77 * HEIGHT,
+      "button_play",
+      this.settingsButtonActions.onClick,
+      this,
+      0,
+      0,
+      1
+    );
+    this.settingsButton.anchor.setTo(0.5, 0.5);
+    this.add
+      .tween(this.settingsButton.scale)
+      .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
+      .yoyo(true, 0)
+      .loop(true);
+
     // Mute Button
     this.muteButton = createMuteButtonPos(this, 0.6, 0.77);
     this.muteButton.anchor.setTo(0.5, 0.5);
@@ -118,6 +136,23 @@ var PauseState = {
       FFGame.reset();
       PPGame.reset();
       this.state.start("ChooseGameState");
+    },
+  },
+  settingsButtonActions: {
+    onClick: function () {
+      AudioManager.playSound("bloop_sfx", this);
+      // Open the TTS/accessibility settings panel (global)
+      try {
+        if (window.TTSManager && typeof window.TTSManager._toggleSettingsPanel === 'function') {
+          window.TTSManager._toggleSettingsPanel();
+        } else {
+          // fallback: trigger existing settings DOM button if present
+          const btn = document.getElementById('tts-settings');
+          if (btn) btn.click();
+        }
+      } catch (e) {
+        // ignore
+      }
     },
   },
 };

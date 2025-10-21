@@ -1439,3 +1439,62 @@ var FFGameData = {
     },
   ],
 };
+
+// Post-processing: auto-generate short human-friendly labels and image alts
+// for TTS to prefer, if explicit fields aren't provided in the data.
+(function () {
+  function sanitizeNameToLabel(name) {
+    if (!name) return '';
+    var s = String(name).replace(/[_-]+/g, ' ');
+    s = s.replace(/^pp\s+|^ff\s+|^image\s+/i, '');
+    // Break on camelCase boundaries
+    s = s.replace(/([a-z])([A-Z])/g, '$1 $2');
+    // Trim and capitalize first letter
+    s = s.trim();
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  // PP level options
+  if (typeof PPGameData !== 'undefined' && PPGameData.levels) {
+    for (var li = 0; li < PPGameData.levels.length; ++li) {
+      var level = PPGameData.levels[li];
+      for (var qi = 0; qi < level.length; ++qi) {
+        var q = level[qi];
+        if (q.options && q.options.length) {
+          for (var oi = 0; oi < q.options.length; ++oi) {
+            var opt = q.options[oi];
+            if (!opt.label) {
+              // Prefer a short snippet of resultUpperText
+              if (opt.resultUpperText) {
+                var t = opt.resultUpperText.replace(/\n+/g, ' ').trim();
+                var m = t.match(/^(.{0,60}?)(\.|$)/);
+                opt.label = (m && m[1]) ? m[1].replace(/\.$/, '').trim() : t.split(/\s+/).slice(0,10).join(' ');
+              } else {
+                opt.label = sanitizeNameToLabel(opt.name || 'option');
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // FF options: set imageAlt for question/result images when missing
+  if (typeof FFGameData !== 'undefined' && FFGameData.options) {
+    for (var i = 0; i < FFGameData.options.length; ++i) {
+      var opt = FFGameData.options[i];
+      var childs = [opt.correct, opt.wrong];
+      for (var c = 0; c < childs.length; ++c) {
+        var child = childs[c];
+        if (!child) continue;
+        if (child.questionImage && !child.questionImageAlt) {
+          // Prefer questionTitle as alt text
+          child.questionImageAlt = child.questionTitle && String(child.questionTitle).trim() ? String(child.questionTitle).replace(/\n+/g, ' ') : sanitizeNameToLabel(child.questionImage);
+        }
+        if (child.resultImage && !child.resultImageAlt) {
+          child.resultImageAlt = child.questionTitle && String(child.questionTitle).trim() ? String(child.questionTitle).replace(/\n+/g, ' ') : sanitizeNameToLabel(child.resultImage);
+        }
+      }
+    }
+  }
+})();

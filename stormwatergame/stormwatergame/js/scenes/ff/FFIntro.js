@@ -144,6 +144,26 @@ var FFIntroState = {
       },
       this
     );
+    // --- TTS integration ---
+    this.getFFIntroVisibleText = () => {
+      const parts = [];
+      try {
+        if (this.speechText1 && this.speechText1.visible) parts.push(this.speechText1.text);
+        if (this.speechText2 && this.speechText2.visible) parts.push(this.speechText2.text);
+        if (this.speechText3 && this.speechText3.visible) parts.push(this.speechText3.text);
+        if (this.speechText4 && this.speechText4.visible) parts.push(this.speechText4.text);
+      } catch (e) {}
+      return parts.join(' - ');
+    };
+    const registerTTS = () => {
+      if (!window.TTSManager) return;
+      window.TTSManager.setGatherTextFn(this.getFFIntroVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+      this._ttsToggleHandler = (e) => { if (e && e.detail && e.detail.enabled) window.TTSManager.speakCurrentText(); };
+      window.TTSManager.on && window.TTSManager.on('tts-toggle', this._ttsToggleHandler);
+    };
+    if (window.TTSManager) registerTTS(); else window.addEventListener('tts-ready', registerTTS, { once: true });
+    // --- end TTS integration ---
   },
   update: function () {
     updateCloudSprites(this);

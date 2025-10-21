@@ -118,12 +118,29 @@ var PPRainState = {
       this.nextDelay,
       function () {
         this.nextButton.visible = true;
+        if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
       },
       this
     );
 
     // Play sound
     AudioManager.playSound("rain_sfx", this);
+
+    // --- TTS integration ---
+    this.getPPRainVisibleText = () => {
+      try {
+        return this.speechText1 && this.speechText1.text ? this.speechText1.text : '';
+      } catch (e) { return ''; }
+    };
+    const registerTTS = () => {
+      if (!window.TTSManager) return;
+      window.TTSManager.setGatherTextFn(this.getPPRainVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+      this._ttsToggleHandler = (e) => { if (e && e.detail && e.detail.enabled) window.TTSManager.speakCurrentText(); };
+      window.TTSManager.on && window.TTSManager.on('tts-toggle', this._ttsToggleHandler);
+    };
+    if (window.TTSManager) registerTTS(); else window.addEventListener('tts-ready', registerTTS, { once: true });
+    // --- end TTS integration ---
   },
   update: function () {},
   nextButtonActions: {

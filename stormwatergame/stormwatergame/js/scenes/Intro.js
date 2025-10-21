@@ -220,9 +220,26 @@ var IntroState = {
       return visibleTexts.join(' ');
     };
 
+<<<<<<< Updated upstream:stormwatergame/stormwatergame/js/scenes/Intro.js
     if (window.TTSManager) {
       window.TTSManager.setGatherTextFn(this.getIntroVisibleText);
       if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+=======
+    const registerTTS = () => {
+      if (!window.TTSManager) return;
+      window.TTSManager.setGatherTextFn(this.getIntroVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+      this._ttsToggleHandler = (e) => {
+        if (e && e.detail && e.detail.enabled) window.TTSManager.speakCurrentText();
+      };
+      window.TTSManager.on && window.TTSManager.on('tts-toggle', this._ttsToggleHandler);
+    };
+
+    if (window.TTSManager) {
+      registerTTS();
+    } else {
+      window.addEventListener('tts-ready', registerTTS, { once: true });
+>>>>>>> Stashed changes:stormwatergame/js/scenes/Intro.js
     }
   },
   update: function () {

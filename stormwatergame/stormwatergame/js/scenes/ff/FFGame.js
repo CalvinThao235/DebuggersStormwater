@@ -288,6 +288,50 @@ var FFGameState = {
 
     // Mute Button
     createMuteButton(this);
+
+    // --- TTS integration ---
+    this.getFFGameVisibleText = () => {
+      try {
+        // If a question box is visible, read the header and question image alt text if set
+        if (this.questionBoxGroup && this.questionBoxGroup.visible) {
+          const header = this.questionHeaderText && this.questionHeaderText.text ? this.questionHeaderText.text : '';
+          // Try to include a short alt/description for the question image if available in data
+          try {
+            var option = FFGame.options[this.currentQuestionId];
+            var data = FFGameData.options[option.id];
+            var childData = option.wrong ? data.wrong : data.correct;
+            if (childData && childData.questionImageAlt) {
+              return header + ' - ' + childData.questionImageAlt;
+            }
+          } catch (inner) {}
+          return header;
+        }
+        // If results box visible, read results texts and include a result image alt if present
+        if (this.resultsBoxGroup && this.resultsBoxGroup.visible) {
+          const parts = [];
+          if (this.resultsHeaderText && this.resultsHeaderText.text) parts.push(this.resultsHeaderText.text);
+          if (this.resultsUpperText && this.resultsUpperText.text) parts.push(this.resultsUpperText.text);
+          if (this.resultsLowerText && this.resultsLowerText.text) parts.push(this.resultsLowerText.text);
+          try {
+            var option2 = FFGame.options[this.currentQuestionId];
+            var data2 = FFGameData.options[option2.id];
+            var childData2 = option2.wrong ? data2.wrong : data2.correct;
+            if (childData2 && childData2.resultImageAlt) parts.push(childData2.resultImageAlt);
+          } catch (inner) {}
+          return parts.join(' - ');
+        }
+        return '';
+      } catch (e) { return ''; }
+    };
+    const registerTTS = () => {
+      if (!window.TTSManager) return;
+      window.TTSManager.setGatherTextFn(this.getFFGameVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+      this._ttsToggleHandler = (e) => { if (e && e.detail && e.detail.enabled) window.TTSManager.speakCurrentText(); };
+      window.TTSManager.on && window.TTSManager.on('tts-toggle', this._ttsToggleHandler);
+    };
+    if (window.TTSManager) registerTTS(); else window.addEventListener('tts-ready', registerTTS, { once: true });
+    // --- end TTS integration ---
   },
   update: function () {},
   setOptionsClickable: function (clickable) {
@@ -313,6 +357,7 @@ var FFGameState = {
 
     this.questionHeaderText.setText(childData.questionTitle);
     this.questionImageSprite.loadTexture(childData.questionImage);
+    if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
   },
   startResult: function (fixIt) {
     AudioManager.playSound("bloop_sfx", this);
@@ -344,6 +389,7 @@ var FFGameState = {
       1000,
       function () {
         this.resultsNextButton.visible = true;
+        if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
       },
       this
     );
@@ -354,6 +400,9 @@ var FFGameState = {
     this.resultsUpperText.setText(dataChildText.resultUpperText);
     this.resultsLowerText.setText(dataChildText.resultLowerText);
     this.resultsImageSprite.loadTexture(dataChild.resultImage);
+
+    // Speak immediately in addition to the delayed speak when next button appears
+    if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
 
     var sprite = this.optionSprites[this.currentQuestionId];
     sprite.enabled = false;

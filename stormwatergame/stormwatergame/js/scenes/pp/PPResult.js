@@ -390,6 +390,7 @@ var PPResultState = {
       this.nextDelay,
       function () {
         this.nextButton.visible = true;
+        if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
       },
       this
     );
@@ -403,6 +404,28 @@ var PPResultState = {
 
     // Mute button
     createMuteButton(this);
+
+    // --- TTS integration ---
+    this.getPPResultVisibleText = () => {
+      const parts = [];
+      try {
+        if (this.headerText && this.headerText.text) parts.push(this.headerText.text);
+        if (this.upperText && this.upperText.text) parts.push(this.upperText.text);
+        if (this.lowerText && this.lowerText.text) parts.push(this.lowerText.text);
+      } catch (e) {}
+      return parts.join(' - ');
+    };
+    // Speak immediately in case TTS is enabled (helps when scene updates while active)
+    if (window.TTSManager && window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+    const registerTTS = () => {
+      if (!window.TTSManager) return;
+      window.TTSManager.setGatherTextFn(this.getPPResultVisibleText);
+      if (window.TTSManager.isEnabled()) window.TTSManager.speakCurrentText();
+      this._ttsToggleHandler = (e) => { if (e && e.detail && e.detail.enabled) window.TTSManager.speakCurrentText(); };
+      window.TTSManager.on && window.TTSManager.on('tts-toggle', this._ttsToggleHandler);
+    };
+    if (window.TTSManager) registerTTS(); else window.addEventListener('tts-ready', registerTTS, { once: true });
+    // --- end TTS integration ---
 
     // Pause Button
     var onPause = function () {
