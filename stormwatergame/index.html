@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Stormwater Game</title>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+
+    <meta
+      name="viewport"
+      content="initial-scale=1 maximum-scale=1 user-scalable=0 minimal-ui"
+    />
+    <meta name="HandheldFriendly" content="true" />
+
+    <link
+      rel="stylesheet"
+      href="stormwatergame/css/stylesheet.css"
+      type="text/css"
+      charset="utf-8"
+    />
+
+    <script type="text/javascript" src="stormwatergame/phaser.min.js"></script>
+
+    <script type="text/javascript" src="stormwatergame/js/Main.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/AudioManager.js"></script>
+
+    <script type="text/javascript" src="stormwatergame/js/GameData.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/Clouds.js"></script>
+
+    <script type="text/javascript" src="stormwatergame/js/scenes/Boot.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/Load.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/Title.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/Intro.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/ChooseGame.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/Pause.js"></script>
+
+    <script type="text/javascript" src="stormwatergame/js/scenes/pp/PPIntro.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/pp/PPQuestion.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/pp/PPRain.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/pp/PPResult.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/pp/PPScore.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/pp/PPLevelSelect.js"></script>
+
+    <script type="text/javascript" src="stormwatergame/js/scenes/ff/FFIntro.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/ff/FFGame.js"></script>
+    <script type="text/javascript" src="stormwatergame/js/scenes/ff/FFScore.js"></script>
+    <!-- TTS: text-to-speech manager and toggle -->
+    <script type="text/javascript" src="stormwatergame/js/tts.js"></script>
+  </head>
+  <body>
+    <div id="gameDiv"></div>
+    <div id="orientation"></div>
+    <!-- TTS toggle for accessibility -->
+    <button id="tts-toggle" role="switch" aria-pressed="false" aria-label="Toggle text to speech" style="position:fixed;right:12px;bottom:12px;z-index:2147483647;pointer-events:auto;padding:8px 10px;border-radius:6px;background:#fff;border:1px solid #ccc;">🔊 TTS: Off</button>
+  </body>
+</html>
