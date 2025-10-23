@@ -436,12 +436,12 @@ var PPGameData = {
           },
           {
             name: "pp_2_1b",
-            correct: true,
+            correct: false,
             wetlands: {
-              overlay: 0,
+              overlay: 2,
               lilypad: true,
-              aliveFish: true,
-              deadFish: false,
+              aliveFish: false,
+              deadFish: true,
               soap: false,
               mulch: false,
               leaves: false,
@@ -449,10 +449,10 @@ var PPGameData = {
               bottle: false,
             },
             resultUpperText:
-              "YOU PREVENTED POLLUTION AND KEPT\nTHE LOCAL WATERWAYS CLEAN!",
+              "THAT PAINT WATER SOAKED INTO THE GROUND AND\nCONTAMINATED SOIL AND OUR LOCAL WATERWAYS!",
             resultLowerText:
-              "JUST MAKE SURE THE DIRTY WATER WILL NOT\nRUN INTO THE STREET.\n\n" +
-              "YOU CAN ALSO WASH BRUSHES IN THE SINK SO THE\nDIRTY WATER IS SENT TO THE SEWER TO BE CLEANED.",
+              "INSTEAD, IT'S BEST TO WASH PAINTBRUSHES IN THE SINK SO\nTHE WATER IS CLEANED AT A TREATMENT FACILITY.\n\n" +
+              "PROTECT OUR ENVIRONMENT BY WASHING IN THE SINK."
           },
           {
             name: "pp_2_1c",
@@ -471,8 +471,7 @@ var PPGameData = {
             resultUpperText:
               "THAT SENT PAINT INTO THE GUTTERS, DOWN THE\nSTORMDRAIN AND POLLUTED LOCAL WATERWAYS!",
             resultLowerText:
-              "NEXT TIME, WASH BRUSHES IN A SINK SO THE DIRTY WATER\nIS SENT TO THE SEWER TO BE CLEANED.\n\n" +
-              "YOU CAN ALSO WASH THE BRUSHES IN YOUR YARD—JUST MAKE\nSURE THAT THE DIRTY WATER DOESN'T RUN OFF INTO THE STREET.",
+              "NEXT TIME, WASH THE BRUSHES IN THE SINK SO\nTHE DIRTY WATER IS SENT TO THE SEWER TO BE CLEANED",
           },
         ],
       },

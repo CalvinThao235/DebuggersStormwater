@@ -1,7 +1,7 @@
 "use strict";
 
 var IntroState = {
-  preload: function () {},
+  preload: function () { },
   create: function () {
     this.subSceneIndex = 0;
 
@@ -202,9 +202,26 @@ var IntroState = {
       },
       this
     );
-
+    // Pause Button
+    var onPause = function () {
+      AudioManager.playSound("bloop_sfx", this);
+      LastState = "PPQuestionState";
+      this.state.start("PauseState");
+    };
+    this.pauseButton = this.add.button(
+      0.892 * WIDTH,
+      0.185 * HEIGHT,
+      "button_pause",
+      onPause,
+      this,
+      0,
+      0,
+      1
+    );
+    this.pauseButton.scale.setTo(0.75);
     // Mute button
     createMuteButton(this);
+
   },
   update: function () {
     updateCloudSprites(this);
