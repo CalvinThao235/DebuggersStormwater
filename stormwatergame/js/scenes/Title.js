@@ -1,7 +1,7 @@
 "use strict";
 
 var TitleState = {
-  preload: function () {},
+  preload: function () { },
   create: function () {
     // Background
     this.backgroundSprite = this.add.sprite(0, 0, "background_1");
