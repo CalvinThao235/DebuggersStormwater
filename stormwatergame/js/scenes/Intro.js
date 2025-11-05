@@ -222,17 +222,11 @@ var IntroState = {
     // Mute button
     createMuteButton(this);
 
-    // TTS button
-    TTSButtons.createToggleButtonPos(this, 0.892, 0.12);
+    // ADA menu button
+    ADAMenu.createADAButton(this);
 
     // Speak first text
     TTSManager.speakGameText(TextData.intro[0]);
-
-    // Add keyboard listener for TTS toggle
-    this.ttsKey = this.input.keyboard.addKey(Phaser.Keyboard.T);
-    this.ttsKey.onDown.add(function() {
-      TTSButtons.onToggleClick.call({scene: this});
-    }, this);
 
   },
   update: function () {
