@@ -222,6 +222,18 @@ var IntroState = {
     // Mute button
     createMuteButton(this);
 
+    // TTS button
+    TTSButtons.createToggleButtonPos(this, 0.892, 0.12);
+
+    // Speak first text
+    TTSManager.speakGameText(TextData.intro[0]);
+
+    // Add keyboard listener for TTS toggle
+    this.ttsKey = this.input.keyboard.addKey(Phaser.Keyboard.T);
+    this.ttsKey.onDown.add(function() {
+      TTSButtons.onToggleClick.call({scene: this});
+    }, this);
+
   },
   update: function () {
     updateCloudSprites(this);
@@ -285,6 +297,9 @@ var IntroState = {
           },
           this
         );
+
+        // Speak the text for this scene
+        TTSManager.speakGameText(TextData.intro[1]);
         break;
       case 2:
         this.professorSprite3.visible = true;
@@ -313,6 +328,9 @@ var IntroState = {
           },
           this
         );
+
+        // Speak the combined text for this scene
+        TTSManager.speakGameText(TextData.intro[2][0] + " " + TextData.intro[2][1]);
         break;
       case 3:
         this.professorSprite4.visible = true;
@@ -340,6 +358,9 @@ var IntroState = {
           },
           this
         );
+
+        // Speak the combined text for this scene
+        TTSManager.speakGameText(TextData.intro[3][0] + " " + TextData.intro[3][1]);
         break;
       case 4:
         this.professorSprite5.visible = true;
@@ -359,8 +380,13 @@ var IntroState = {
           },
           this
         );
+
+        // Speak the text for this scene
+        TTSManager.speakGameText(TextData.intro[4]);
         break;
       case 5:
+        // Stop any ongoing speech when leaving this scene
+        TTSManager.stop();
         this.state.start("ChooseGameState");
         break;
     }

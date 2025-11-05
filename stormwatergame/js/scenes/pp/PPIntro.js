@@ -134,6 +134,15 @@ var PPIntroState = {
     // Mute button
     createMuteButton(this);
 
+    // TTS button
+    TTSButtons.createToggleButtonPos(this, 0.892, 0.12);
+
+    // Add keyboard listener for TTS toggle
+    this.ttsKey = this.input.keyboard.addKey(Phaser.Keyboard.T);
+    this.ttsKey.onDown.add(function() {
+      TTSButtons.onToggleClick.call({scene: this});
+    }, this);
+
     // Start Animation
     this.nextDelay = 1000;
     this.animationSpeed = 500;
@@ -151,6 +160,9 @@ var PPIntroState = {
       },
       this
     );
+
+    // Speak first text
+    TTSManager.speakGameText(TextData.ppIntro[0]);
   },
   update: function () {
     updateCloudSprites(this);
@@ -210,6 +222,9 @@ var PPIntroState = {
           },
           this
         );
+        
+        // Speak the text for this scene
+        TTSManager.speakGameText(TextData.ppIntro[1]);
         break;
       case 2:
         this.professorSprite3.visible = true;
@@ -229,8 +244,13 @@ var PPIntroState = {
           },
           this
         );
+        
+        // Speak the text for this scene
+        TTSManager.speakGameText(TextData.ppIntro[2]);
         break;
       case 3:
+        // Stop any ongoing speech when leaving this scene
+        TTSManager.stop();
         this.state.start("PPLevelSelectState");
         break;
     }

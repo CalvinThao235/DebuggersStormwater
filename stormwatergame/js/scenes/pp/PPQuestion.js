@@ -36,6 +36,15 @@ var PPQuestionState = {
     // Mute button
     createMuteButton(this);
 
+    // TTS button
+    TTSButtons.createToggleButtonPos(this, 0.892, 0.12);
+
+    // Add keyboard listener for TTS toggle
+    this.ttsKey = this.input.keyboard.addKey(Phaser.Keyboard.T);
+    this.ttsKey.onDown.add(function() {
+      TTSButtons.onToggleClick.call({scene: this});
+    }, this);
+
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
@@ -89,6 +98,9 @@ var PPQuestionState = {
 
     // Play music
     AudioManager.playSong("pp_music", this);
+
+    // Speak question prompt
+    TTSManager.speakGameText("Choose the best option to protect our waterways.", { delay: 500 });
   },
   update: function () {},
 };

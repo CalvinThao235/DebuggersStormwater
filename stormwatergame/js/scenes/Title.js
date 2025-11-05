@@ -49,6 +49,18 @@ var TitleState = {
     // Mute button
     createMuteButton(this);
 
+    // TTS button
+    TTSButtons.createToggleButtonPos(this, 0.892, 0.12);
+
+    // Add keyboard listener for TTS toggle
+    this.ttsKey = this.input.keyboard.addKey(Phaser.Keyboard.T);
+    this.ttsKey.onDown.add(function() {
+      TTSButtons.onToggleClick.call({scene: this});
+    }, this);
+
+    // Speak welcome message
+    TTSManager.speakGameText("Welcome to Professor Davis Green's Stormwater Game! Press play to begin learning about preventing stormwater pollution.", { delay: 1000 });
+
     // Audio
     AudioManager.playSong("title_music", this);
   },
