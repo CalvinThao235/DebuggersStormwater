@@ -45,6 +45,7 @@ var FFGameState = {
       );
       clickableSprite.anchor.setTo(0.5, 0.5);
       clickableSprite.scale.setTo(spriteData.scale.x, spriteData.scale.y);
+      
       //
       this.add
         .tween(clickableSprite.scale)
