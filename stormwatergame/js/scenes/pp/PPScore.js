@@ -81,6 +81,12 @@ var PPScoreState = {
     // Mute button
     createMuteButton(this);
 
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
+    // Speak the final score
+    TTSManager.speakGameText(PPGameData.finalScore(PPGame.score));
+
     // Start Animation
     this.animationSpeed = 500;
 

@@ -73,6 +73,12 @@ var ChooseGameState = {
     // Mute button
     createMuteButton(this);
 
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
+    // Speak the choose game text
+    TTSManager.speakGameText(TextData.chooseGame);
+
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);

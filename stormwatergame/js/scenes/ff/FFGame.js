@@ -288,6 +288,12 @@ var FFGameState = {
 
     // Mute Button
     createMuteButton(this);
+
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
+    // Speak initial instruction
+    TTSManager.speakGameText("Look at the neighborhood activities. Click on any activity to decide if it's okay or needs to be fixed.", { delay: 500 });
   },
   update: function () { },
   setOptionsClickable: function (clickable) {
@@ -313,6 +319,9 @@ var FFGameState = {
 
     this.questionHeaderText.setText(childData.questionTitle);
     this.questionImageSprite.loadTexture(childData.questionImage);
+
+    // Speak the question title
+    TTSManager.speakGameText(childData.questionTitle, { delay: 600 });
   },
   startResult: function (fixIt) {
     AudioManager.playSound("bloop_sfx", this);
@@ -354,6 +363,10 @@ var FFGameState = {
     this.resultsUpperText.setText(dataChildText.resultUpperText);
     this.resultsLowerText.setText(dataChildText.resultLowerText);
     this.resultsImageSprite.loadTexture(dataChild.resultImage);
+
+    // Speak the result text
+    var headerText = FFGameData.resultsHeader[!correct ? 2 : !fixIt ? 1 : 0];
+    TTSManager.speakGameText(headerText + " " + dataChildText.resultUpperText + " " + dataChildText.resultLowerText, { delay: 800 });
 
     var sprite = this.optionSprites[this.currentQuestionId];
     sprite.enabled = false;
