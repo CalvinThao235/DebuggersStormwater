@@ -1,5 +1,5 @@
 "use strict";
-
+var LastState = "ChooseGameState";
 var ChooseGameState = {
   preload: function () { },
   create: function () {
@@ -76,7 +76,7 @@ var ChooseGameState = {
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
-      LastState = "PPQuestionState";
+      LastState = "ChooseGameState";
       this.state.start("PauseState");
     };
     this.pauseButton = this.add.button(

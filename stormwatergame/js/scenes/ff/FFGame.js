@@ -45,6 +45,13 @@ var FFGameState = {
       );
       clickableSprite.anchor.setTo(0.5, 0.5);
       clickableSprite.scale.setTo(spriteData.scale.x, spriteData.scale.y);
+      //
+      this.add
+        .tween(clickableSprite.scale)
+        .to({ x: spriteData.scale.x * 1.1, y: spriteData.scale.y * 1.1 }, 1200, "Linear", true)
+        .yoyo(true, 0)
+        .loop(true);
+
       var onClick = function (ref) {
         this.currentQuestionId = ref.optionIndex;
         this.startQuestion();
@@ -54,6 +61,22 @@ var FFGameState = {
       clickableSprite.inputEnabled = true;
       clickableSprite.input.useHandCursor = true;
       this.middleLayer.add(clickableSprite);
+
+
+      var spriteLabel = this.add.text(
+        spriteData.position.x * WIDTH,
+        (spriteData.position.y * HEIGHT) - ((clickableSprite.height * clickableSprite.scale.y) / 2),
+        data.label || "Site " + (i + 1),
+        {
+          font: "20px Arial",
+          fill: "#ffffff",
+          stroke: "#000000",
+          strokeThickness: 3,
+          align: "center",
+        }
+      );
+      spriteLabel.anchor.setTo(0.5, 0.5);
+      this.topLayer.add(spriteLabel);
 
       var optionSprite = {
         enabled: true,
@@ -113,7 +136,11 @@ var FFGameState = {
     }
 
     // Bush
-    this.bushSprite = this.add.sprite(0.93 * WIDTH, 0.4 * HEIGHT, "ff_bush");
+    this.bushSprite = this.add.sprite(
+      0.93 * WIDTH,
+      0.4 * HEIGHT,
+      "ff_bush"
+    );
     this.bushSprite.anchor.setTo(0.5, 0.5);
 
     // Sprinklers
