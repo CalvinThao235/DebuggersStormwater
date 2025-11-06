@@ -1,7 +1,8 @@
-body {
+html, head, body {
   font-family: "Comic Sans", "Comic Sans MS", "Chalkboard",
     "ChalkboardSE-Regular", sans-serif;
-  margin: 0px 0px 1px 0px; /* the extra 1px allows the iOS inner/outer check to work */
+  margin: 0px 0px 1px 0px;
+  /* the extra 1px allows the iOS inner/outer check to work */
   background: #000;
 }
 
@@ -15,4 +16,27 @@ body {
   background-color: rgb(0, 0, 0);
   z-index: 999;
   display: none;
+}
+
+#gameWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  margin-top: 20px;
+
+}
+
+#controlLegend {
+  background-color: rgb(59, 57, 57);
+  padding: 1px 15px;
+  border: 1px solid white;
+  border-radius: 10px;
+  font-family: "Comic Sans", "Comic Sans MS", "Chalkboard",
+    "ChalkboardSE-Regular", sans-serif;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.4em;
+  height: fit-content
+
 }
