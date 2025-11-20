@@ -36,6 +36,9 @@ var PPQuestionState = {
     // Mute button
     createMuteButton(this);
 
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
@@ -89,6 +92,9 @@ var PPQuestionState = {
 
     // Play music
     AudioManager.playSong("pp_music", this);
+
+    // Speak question prompt
+    TTSManager.speakGameText("Choose the best option to protect our waterways.", { delay: 500 });
   },
   update: function () {},
 };
