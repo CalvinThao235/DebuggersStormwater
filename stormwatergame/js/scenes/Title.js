@@ -40,11 +40,16 @@ var TitleState = {
       1
     );
     this.playButton.anchor.setTo(0.5, 0.5);
-    this.add
-      .tween(this.playButton.scale)
+    createAccessibleTween(this, this.playButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
+
+    // Add spacebar support for play button
+    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spaceKey.onDown.add(function() {
+      this.playButton.onInputDown.dispatch();
+    }, this);
 
     // Mute button
     createMuteButton(this);

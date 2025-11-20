@@ -344,6 +344,7 @@ var PPResultState = {
       "speechbox_4"
     );
     this.speechBox.anchor.setTo(0.46, 0.5);
+    scaleForTextSize(this.speechBox, 1.0, 1.0);
 
     // Lower Text
     this.lowerText = this.add.text(
@@ -370,21 +371,26 @@ var PPResultState = {
     );
     this.nextButton.anchor.setTo(0.5, 0.5);
     this.nextButton.visible = false;
-    this.add
-      .tween(this.nextButton.scale)
+    createAccessibleTween(this, this.nextButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
 
+    // Add spacebar support for next button
+    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spaceKey.onDown.add(function() {
+      if (this.nextButton && this.nextButton.visible) {
+        this.nextButton.onInputDown.dispatch();
+      }
+    }, this);
+
     // Start Animation
     this.nextDelay = 1000;
-    this.animationSpeed = 500;
+    this.animationSpeed = window.ADAReducedMotion ? 0 : 500;
 
-    this.add
-      .tween(this.lowerText.scale)
+    createAccessibleTween(this, this.lowerText.scale)
       .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
-    this.add
-      .tween(this.speechBox.scale)
+    createAccessibleTween(this, this.speechBox.scale)
       .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
     this.time.events.add(
       this.nextDelay,

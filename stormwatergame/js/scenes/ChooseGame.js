@@ -47,8 +47,7 @@ var ChooseGameState = {
       1
     );
     this.ffButton.anchor.setTo(0.5, 0.5);
-    this.add
-      .tween(this.ffButton.scale)
+    createAccessibleTween(this, this.ffButton.scale)
       .to({ x: 0.9, y: 0.9 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
@@ -64,8 +63,7 @@ var ChooseGameState = {
       1
     );
     this.ppButton.anchor.setTo(0.5, 0.5);
-    this.add
-      .tween(this.ppButton.scale)
+    createAccessibleTween(this, this.ppButton.scale)
       .to({ x: 0.9, y: 0.9 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);

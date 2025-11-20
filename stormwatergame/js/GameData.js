@@ -77,26 +77,57 @@ var FFGame = {
 };
 FFGame.reset();
 
+// Helper function to get font size with ADA multiplier
+function getADAFontSize(baseSize) {
+  var multiplier = window.ADATextSizeMultiplier || 1.0;
+  return Math.round(baseSize * multiplier);
+}
+
+// Helper function to scale speech boxes/containers based on text size
+function scaleForTextSize(sprite, baseScaleX, baseScaleY) {
+  if (!sprite) return;
+  var multiplier = window.ADATextSizeMultiplier || 1.0;
+  // Scale the sprite to accommodate larger text
+  // Use a smaller multiplier for boxes to keep them within bounds
+  // Cap at 1.4x even when text is at 1.8x to prevent overflow
+  var boxMultiplier = Math.min(1.4, 1.0 + ((multiplier - 1.0) * 0.5));
+  sprite.scale.setTo(
+    (baseScaleX || 1.0) * boxMultiplier, 
+    (baseScaleY || 1.0) * boxMultiplier
+  );
+}
+
+// Dynamic TextStyle that applies ADA text size multiplier
 var TextStyle = {
-  centered: {
-    font: '12pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
-    align: "center",
+  get centered() {
+    return {
+      font: getADAFontSize(12) + 'pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
+      align: "center",
+    };
   },
-  centeredLarge: {
-    font: '14pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
-    align: "center",
+  get centeredLarge() {
+    return {
+      font: getADAFontSize(14) + 'pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
+      align: "center",
+    };
   },
-  centeredExtraLarge: {
-    font: '16pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
-    align: "center",
+  get centeredExtraLarge() {
+    return {
+      font: getADAFontSize(16) + 'pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
+      align: "center",
+    };
   },
-  centeredXXLarge: {
-    font: '24pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
-    align: "center",
+  get centeredXXLarge() {
+    return {
+      font: getADAFontSize(24) + 'pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
+      align: "center",
+    };
   },
-  centeredHeader: {
-    font: '28pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
-    align: "center",
+  get centeredHeader() {
+    return {
+      font: getADAFontSize(28) + 'pt "Comic Sans", "Comic Sans MS", "Chalkboard", "ChalkboardSE-Regular", sans-serif',
+      align: "center",
+    };
   },
   lineSpacing: -8,
 };

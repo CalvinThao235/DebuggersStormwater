@@ -13,20 +13,20 @@ var PPRainState = {
       0.02 * HEIGHT,
       "cloud_3"
     );
-    this.add
-      .tween(this.cloudSprite1)
+    createAccessibleTween(this, this.cloudSprite1)
       .to({ x: -0.02 * WIDTH }, 2000, "Sine", true);
 
     this.cloudSprite2 = this.add.sprite(0.88 * WIDTH, 0.18 * HEIGHT, "cloud_4");
-    this.add
-      .tween(this.cloudSprite2)
+    createAccessibleTween(this, this.cloudSprite2)
       .to({ x: 0.7 * WIDTH }, 2000, "Sine", true);
 
     // Misc.
     this.houseSprite = this.add.sprite(0.08 * WIDTH, 0.45 * HEIGHT, "pp_house");
 
-    // Rain
-    this.rainEmitter = this.add.emitter(0.5 * WIDTH, -0.5 * HEIGHT, 200);
+    // Rain - reduced particle count if reduced motion is enabled
+    var particleCount = window.ADAReducedMotion ? 50 : 200;
+    var emissionRate = window.ADAReducedMotion ? 20 : 5;
+    this.rainEmitter = this.add.emitter(0.5 * WIDTH, -0.5 * HEIGHT, particleCount);
     this.rainEmitter.width = 1.5 * WIDTH;
     this.rainEmitter.angle = 20;
     this.rainEmitter.makeParticles("pp_raindrop");
@@ -35,7 +35,7 @@ var PPRainState = {
     this.rainEmitter.setYSpeed(300, 500);
     this.rainEmitter.setXSpeed(-5, 5);
     this.rainEmitter.minRotation = this.rainEmitter.maxRotation = 0;
-    this.rainEmitter.start(false, 1600, 5, 0);
+    this.rainEmitter.start(false, 1600, emissionRate, 0);
 
     // Characters
     this.professorSprite1 = this.add.sprite(
@@ -50,8 +50,8 @@ var PPRainState = {
       0.68 * HEIGHT,
       "speechbox_2"
     );
-    this.speechBox1.scale.setTo(-1.0, -1.0);
     this.speechBox1.anchor.setTo(0.44, 0.5);
+    scaleForTextSize(this.speechBox1, -1.0, -1.0);
 
     // Speech Text
     this.speechText1 = this.add.text(
@@ -77,11 +77,18 @@ var PPRainState = {
     );
     this.nextButton.anchor.setTo(0.5, 0.5);
     this.nextButton.visible = false;
-    this.add
-      .tween(this.nextButton.scale)
+    createAccessibleTween(this, this.nextButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
+
+    // Add spacebar support for next button
+    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spaceKey.onDown.add(function() {
+      if (this.nextButton && this.nextButton.visible) {
+        this.nextButton.onInputDown.dispatch();
+      }
+    }, this);
 
     // Mute button
     createMuteButton(this);
@@ -109,13 +116,11 @@ var PPRainState = {
 
     // Start Animation
     this.nextDelay = 1000;
-    this.animationSpeed = 500;
+    this.animationSpeed = window.ADAReducedMotion ? 0 : 500;
 
-    this.add
-      .tween(this.speechText1.scale)
+    createAccessibleTween(this, this.speechText1.scale)
       .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
-    this.add
-      .tween(this.speechBox1.scale)
+    createAccessibleTween(this, this.speechBox1.scale)
       .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
     this.time.events.add(
       this.nextDelay,

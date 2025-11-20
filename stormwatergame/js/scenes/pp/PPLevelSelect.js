@@ -32,7 +32,7 @@ var PPLevelSelectState = {
       "speechbox_3"
     );
     this.speechBox.anchor.setTo(0.44, 0.5);
-    this.speechBox.scale.setTo(-1, -1);
+    scaleForTextSize(this.speechBox, -1, -1);
 
     // Speech Text
     this.speechText = this.add.text(

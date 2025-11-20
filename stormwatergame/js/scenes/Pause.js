@@ -45,8 +45,7 @@ var PauseState = {
       1
     );
     this.resumeButton.anchor.setTo(0.5, 0.5);
-    this.add
-      .tween(this.resumeButton.scale)
+    createAccessibleTween(this, this.resumeButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
@@ -62,8 +61,7 @@ var PauseState = {
       1
     );
     this.restartButton.anchor.setTo(0.5, 0.5);
-    this.add
-      .tween(this.restartButton.scale)
+    createAccessibleTween(this, this.restartButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
@@ -79,8 +77,7 @@ var PauseState = {
       1
     );
     this.homeButton.anchor.setTo(0.5, 0.5);
-    this.add
-      .tween(this.homeButton.scale)
+    createAccessibleTween(this, this.homeButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
@@ -89,8 +86,7 @@ var PauseState = {
     this.muteButton = createMuteButtonPos(this, 0.6, 0.77);
     this.muteButton.anchor.setTo(0.5, 0.5);
     this.muteButton.scale.setTo(1.0, 1.0);
-    this.add
-      .tween(this.muteButton.scale)
+    createAccessibleTween(this, this.muteButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);

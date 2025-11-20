@@ -20,6 +20,11 @@ function createCloudSprites(scene) {
 }
 
 function updateCloudSprites(scene) {
+  // Skip cloud animation if reduced motion is enabled
+  if (window.ADAReducedMotion) {
+    return;
+  }
+  
   for (var i = 0; i < clouds.length; ++i) {
     var cloud = clouds[i];
     cloud.x += CLOUD_SPEED;

@@ -2,6 +2,17 @@
 
 var BootState = {
   init: function () {
+    // Initialize global ADA accessibility variables
+    if (typeof window.ADATextSizeMultiplier === 'undefined') {
+      window.ADATextSizeMultiplier = 1.0;
+    }
+    if (typeof window.ADAReducedMotion === 'undefined') {
+      window.ADAReducedMotion = false;
+    }
+    if (typeof window.ADAAudioCaptions === 'undefined') {
+      window.ADAAudioCaptions = false;
+    }
+
     if (this.game.device.desktop) {
       this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
       this.scale.setMinMax(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT);

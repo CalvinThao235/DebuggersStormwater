@@ -83,12 +83,43 @@ var PPQuestionState = {
       );
       optionButton.anchor.setTo(0.5, 0.5);
       optionButton.optionIndex = PPGame.optionOrder[i].id;
-      this.add
-        .tween(optionButton.scale)
+      createAccessibleTween(this, optionButton.scale)
         .to({ x: 0.95, y: 0.95 }, 600, "Linear", true)
         .yoyo(true, 0)
         .loop(true);
+      
+      // Store buttons for keyboard navigation
+      if (!this.optionButtons) {
+        this.optionButtons = [];
+      }
+      this.optionButtons.push(optionButton);
     }
+
+    // Add keyboard support for arrow keys and spacebar
+    this.selectedOptionIndex = 0;
+    
+    this.leftKey = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+    this.leftKey.onDown.add(function() {
+      if (this.optionButtons && this.optionButtons.length > 0) {
+        this.selectedOptionIndex = (this.selectedOptionIndex - 1 + this.optionButtons.length) % this.optionButtons.length;
+        TTSManager.speak("Option " + (this.selectedOptionIndex + 1));
+      }
+    }, this);
+    
+    this.rightKey = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+    this.rightKey.onDown.add(function() {
+      if (this.optionButtons && this.optionButtons.length > 0) {
+        this.selectedOptionIndex = (this.selectedOptionIndex + 1) % this.optionButtons.length;
+        TTSManager.speak("Option " + (this.selectedOptionIndex + 1));
+      }
+    }, this);
+    
+    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spaceKey.onDown.add(function() {
+      if (this.optionButtons && this.optionButtons[this.selectedOptionIndex]) {
+        this.optionButtons[this.selectedOptionIndex].onInputDown.dispatch();
+      }
+    }, this);
 
     // Play music
     AudioManager.playSong("pp_music", this);
