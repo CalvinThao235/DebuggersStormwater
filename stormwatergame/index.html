@@ -38,10 +38,18 @@
   <script type="text/javascript" src="js/scenes/ff/FFGame.js"></script>
   <script type="text/javascript" src="js/scenes/ff/FFScore.js"></script>
 </head>
+  <script>
+    function toggleControls() {
+      var x = document.getElementById("controlLegend")
+      x.classList.toggle("visible");
+    }
+  </script>
 <body>
   <div id="gameWrapper">
     <div id="gameDiv"></div>
     <div id="orientation"></div>
+    <div  id = "controlPanel">
+    <button onclick = "toggleControls()"> Toggle Controls </button>
     <div id="controlLegend">
       <h3>Controls:</h3>
       <p>&larr; : Left Option</p>
@@ -51,6 +59,7 @@
       <p>T : Toggle Text-to-Speech</p>
       <p>C : Toggle Colorblind Support</p>
       <p>H : Toggle High Contrast</p>
+    </div>
     </div>
   </div>
 </body>

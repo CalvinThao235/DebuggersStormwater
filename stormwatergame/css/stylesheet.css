@@ -1,6 +1,4 @@
-html,
-head,
-body {
+html, head, body {
   font-family: "Comic Sans", "Comic Sans MS", "Chalkboard",
     "ChalkboardSE-Regular", sans-serif;
   margin: 0px 0px 1px 0px;
@@ -23,21 +21,33 @@ body {
 #gameWrapper {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  margin-top: 20px;
+  position: relative;
+}
+
+#controlPanel {
+  position: relative;
+  left: 5px;
+  top: -3px;
 }
 
 #controlLegend {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
   background-color: rgb(59, 57, 57);
-  padding-left: 10px;
+  padding: 4px 12px;
   border: 1px solid white;
-  border-radius: 10px;
+  border-radius: 0.5px;
   font-family: "Comic Sans", "Comic Sans MS", "Chalkboard",
     "ChalkboardSE-Regular", sans-serif;
   color: #ffffff;
   font-size: 16px;
   line-height: 1.4em;
   height: fit-content;
-  width: 890px;
-  justify-content: center;
+}
+
+#controlLegend.visible {
+  visibility: visible;
+  opacity: 1;
 }
