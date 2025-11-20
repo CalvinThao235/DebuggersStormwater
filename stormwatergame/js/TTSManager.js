@@ -174,6 +174,11 @@ var TTSManager = {
     speechSynthesis.speak(utterance);
 
     console.log('TTS: Speaking:', cleanedText.substring(0, 50) + '...');
+
+    // Display captions if enabled
+    if (window.ADAAudioCaptions && cleanedText) {
+      this.showCaption(cleanedText, options.delay || 0);
+    }
   },
 
   // Queue text to be spoken after current speech finishes
@@ -222,6 +227,48 @@ var TTSManager = {
     if (speechSynthesis.paused) {
       speechSynthesis.resume();
     }
+  },
+
+  // Show caption overlay
+  showCaption: function(text, delay) {
+    var self = this;
+    setTimeout(function() {
+      // Create caption container if it doesn't exist
+      var captionDiv = document.getElementById('adaCaptionOverlay');
+      if (!captionDiv) {
+        captionDiv = document.createElement('div');
+        captionDiv.id = 'adaCaptionOverlay';
+        captionDiv.style.position = 'fixed';
+        captionDiv.style.bottom = '10%';
+        captionDiv.style.left = '50%';
+        captionDiv.style.transform = 'translateX(-50%)';
+        captionDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+        captionDiv.style.color = '#FFFFFF';
+        captionDiv.style.padding = '15px 25px';
+        captionDiv.style.borderRadius = '8px';
+        captionDiv.style.fontSize = '18px';
+        captionDiv.style.fontFamily = 'Arial, sans-serif';
+        captionDiv.style.maxWidth = '80%';
+        captionDiv.style.textAlign = 'center';
+        captionDiv.style.zIndex = '10000';
+        captionDiv.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+        captionDiv.style.display = 'none';
+        document.body.appendChild(captionDiv);
+      }
+
+      // Show the caption
+      captionDiv.textContent = text;
+      captionDiv.style.display = 'block';
+
+      // Auto-hide after duration based on text length (roughly 50ms per character)
+      var duration = Math.max(2000, text.length * 50);
+      if (self.captionTimeout) {
+        clearTimeout(self.captionTimeout);
+      }
+      self.captionTimeout = setTimeout(function() {
+        captionDiv.style.display = 'none';
+      }, duration);
+    }, delay);
   },
 
   // Toggle TTS on/off
@@ -283,6 +330,11 @@ var ADAMenu = {
   colorBlindMode: 0, // 0 = Off, 1 = Deuteranopia, 2 = Protanopia, 3 = Tritanopia
   colorBlindTypes: ['Off', 'Deuteranopia', 'Protanopia', 'Tritanopia'],
   highContrastMode: false,
+  textSizeMode: 0, // 0 = Normal, 1 = Large, 2 = Extra Large
+  textSizeModes: ['Normal', 'Large', 'X-Large'],
+  textSizeMultipliers: [1.0, 1.4, 1.6],
+  reducedMotionMode: false,
+  audioCaptionsMode: false,
   
   // Create ADA menu button in bottom left
   createADAButton: function(scene) {
@@ -343,12 +395,12 @@ var ADAMenu = {
 
   // Create the ADA options menu
   createADAMenu: function(scene) {
-    // Menu background - cleaner, more compact
+    // Menu background - extended for more options
     scene.adaMenuBG = scene.add.graphics(0, 0);
     scene.adaMenuBG.beginFill(0x000000, 0.9);
     scene.adaMenuBG.drawRoundedRect(
-      0.02 * WIDTH, 0.55 * HEIGHT,
-      0.28 * WIDTH, 0.28 * HEIGHT,
+      0.02 * WIDTH, 0.38 * HEIGHT,
+      0.28 * WIDTH, 0.45 * HEIGHT,
       8
     );
     scene.adaMenuBG.visible = false;
@@ -357,8 +409,8 @@ var ADAMenu = {
     scene.adaMenuBorder = scene.add.graphics(0, 0);
     scene.adaMenuBorder.lineStyle(2, 0x28A745, 1);
     scene.adaMenuBorder.drawRoundedRect(
-      0.02 * WIDTH, 0.55 * HEIGHT,
-      0.28 * WIDTH, 0.28 * HEIGHT,
+      0.02 * WIDTH, 0.38 * HEIGHT,
+      0.28 * WIDTH, 0.45 * HEIGHT,
       8
     );
     scene.adaMenuBorder.visible = false;
@@ -366,7 +418,7 @@ var ADAMenu = {
     // Menu title
     scene.adaMenuTitle = scene.add.text(
       0.16 * WIDTH,
-      0.57 * HEIGHT,
+      0.40 * HEIGHT,
       'Accessibility',
       {
         font: 'bold 11pt Arial',
@@ -381,7 +433,7 @@ var ADAMenu = {
     // TTS Toggle Box (simple rectangle)
     scene.ttsToggleButton = scene.add.graphics(0, 0);
     scene.ttsToggleButton.beginFill(TTSManager.enabled ? 0xFF4444 : 0x000000, 0.8);
-    scene.ttsToggleButton.drawRoundedRect(0.04 * WIDTH, 0.61 * HEIGHT, 15, 15, 3);
+    scene.ttsToggleButton.drawRoundedRect(0.04 * WIDTH, 0.44 * HEIGHT, 15, 15, 3);
     scene.ttsToggleButton.endFill();
     scene.ttsToggleButton.inputEnabled = true;
     scene.ttsToggleButton.input.useHandCursor = true;
@@ -393,7 +445,7 @@ var ADAMenu = {
     // TTS Label
     scene.ttsLabel = scene.add.text(
       0.065 * WIDTH,
-      0.618 * HEIGHT,
+      0.448 * HEIGHT,
       'Text-to-Speech (T)',
       {
         font: '8pt Arial',
@@ -407,7 +459,7 @@ var ADAMenu = {
     // TTS Status
     scene.ttsStatus = scene.add.text(
       0.27 * WIDTH,
-      0.618 * HEIGHT,
+      0.448 * HEIGHT,
       TTSManager.enabled ? 'ON' : 'OFF',
       {
         font: 'bold 8pt Arial',
@@ -422,7 +474,7 @@ var ADAMenu = {
     // Colorblind Toggle Box (simple rectangle)
     scene.colorBlindButton = scene.add.graphics(0, 0);
     scene.colorBlindButton.beginFill(this.colorBlindMode > 0 ? 0xFF4444 : 0x000000, 0.8);
-    scene.colorBlindButton.drawRoundedRect(0.04 * WIDTH, 0.67 * HEIGHT, 15, 15, 3);
+    scene.colorBlindButton.drawRoundedRect(0.04 * WIDTH, 0.50 * HEIGHT, 15, 15, 3);
     scene.colorBlindButton.endFill();
     scene.colorBlindButton.inputEnabled = true;
     scene.colorBlindButton.input.useHandCursor = true;
@@ -434,7 +486,7 @@ var ADAMenu = {
     // Colorblind Label
     scene.colorBlindLabel = scene.add.text(
       0.065 * WIDTH,
-      0.678 * HEIGHT,
+      0.508 * HEIGHT,
       'Colorblind Mode (C)',
       {
         font: '8pt Arial',
@@ -448,7 +500,7 @@ var ADAMenu = {
     // Colorblind Status - shows current type
     scene.colorBlindStatus = scene.add.text(
       0.27 * WIDTH,
-      0.678 * HEIGHT,
+      0.508 * HEIGHT,
       this.colorBlindTypes[this.colorBlindMode],
       {
         font: 'bold 7pt Arial',
@@ -463,7 +515,7 @@ var ADAMenu = {
     // High Contrast Toggle Box (simple rectangle)
     scene.contrastButton = scene.add.graphics(0, 0);
     scene.contrastButton.beginFill(this.highContrastMode ? 0xFF4444 : 0x000000, 0.8);
-    scene.contrastButton.drawRoundedRect(0.04 * WIDTH, 0.73 * HEIGHT, 15, 15, 3);
+    scene.contrastButton.drawRoundedRect(0.04 * WIDTH, 0.56 * HEIGHT, 15, 15, 3);
     scene.contrastButton.endFill();
     scene.contrastButton.inputEnabled = true;
     scene.contrastButton.input.useHandCursor = true;
@@ -475,7 +527,7 @@ var ADAMenu = {
     // High Contrast Label
     scene.contrastLabel = scene.add.text(
       0.065 * WIDTH,
-      0.738 * HEIGHT,
+      0.568 * HEIGHT,
       'High Contrast (H)',
       {
         font: '8pt Arial',
@@ -489,7 +541,7 @@ var ADAMenu = {
     // High Contrast Status
     scene.contrastStatus = scene.add.text(
       0.27 * WIDTH,
-      0.738 * HEIGHT,
+      0.568 * HEIGHT,
       this.highContrastMode ? 'ON' : 'OFF',
       {
         font: 'bold 8pt Arial',
@@ -500,11 +552,134 @@ var ADAMenu = {
     scene.contrastStatus.anchor.setTo(1, 0.5);
     scene.contrastStatus.visible = false;
 
+    // === TEXT SIZE SECTION ===
+    // Text Size Toggle Box (simple rectangle)
+    scene.textSizeButton = scene.add.graphics(0, 0);
+    scene.textSizeButton.beginFill(this.textSizeMode > 0 ? 0xFF4444 : 0x000000, 0.8);
+    scene.textSizeButton.drawRoundedRect(0.04 * WIDTH, 0.62 * HEIGHT, 15, 15, 3);
+    scene.textSizeButton.endFill();
+    scene.textSizeButton.inputEnabled = true;
+    scene.textSizeButton.input.useHandCursor = true;
+    scene.textSizeButton.events.onInputDown.add(function() {
+      ADAMenu.toggleTextSize(scene);
+    }, scene);
+    scene.textSizeButton.visible = false;
+
+    // Text Size Label
+    scene.textSizeLabel = scene.add.text(
+      0.065 * WIDTH,
+      0.628 * HEIGHT,
+      'Text Size (S)',
+      {
+        font: '8pt Arial',
+        fill: '#FFFFFF',
+        align: 'left'
+      }
+    );
+    scene.textSizeLabel.anchor.setTo(0, 0.5);
+    scene.textSizeLabel.visible = false;
+
+    // Text Size Status - shows current size
+    scene.textSizeStatus = scene.add.text(
+      0.27 * WIDTH,
+      0.628 * HEIGHT,
+      this.textSizeModes[this.textSizeMode],
+      {
+        font: 'bold 7pt Arial',
+        fill: this.textSizeMode > 0 ? '#FF4444' : '#666666',
+        align: 'right'
+      }
+    );
+    scene.textSizeStatus.anchor.setTo(1, 0.5);
+    scene.textSizeStatus.visible = false;
+
+    // === REDUCED MOTION SECTION ===
+    // Reduced Motion Toggle Box (simple rectangle)
+    scene.reducedMotionButton = scene.add.graphics(0, 0);
+    scene.reducedMotionButton.beginFill(this.reducedMotionMode ? 0xFF4444 : 0x000000, 0.8);
+    scene.reducedMotionButton.drawRoundedRect(0.04 * WIDTH, 0.68 * HEIGHT, 15, 15, 3);
+    scene.reducedMotionButton.endFill();
+    scene.reducedMotionButton.inputEnabled = true;
+    scene.reducedMotionButton.input.useHandCursor = true;
+    scene.reducedMotionButton.events.onInputDown.add(function() {
+      ADAMenu.toggleReducedMotion(scene);
+    }, scene);
+    scene.reducedMotionButton.visible = false;
+
+    // Reduced Motion Label
+    scene.reducedMotionLabel = scene.add.text(
+      0.065 * WIDTH,
+      0.688 * HEIGHT,
+      'Reduced Motion (M)',
+      {
+        font: '8pt Arial',
+        fill: '#FFFFFF',
+        align: 'left'
+      }
+    );
+    scene.reducedMotionLabel.anchor.setTo(0, 0.5);
+    scene.reducedMotionLabel.visible = false;
+
+    // Reduced Motion Status
+    scene.reducedMotionStatus = scene.add.text(
+      0.27 * WIDTH,
+      0.688 * HEIGHT,
+      this.reducedMotionMode ? 'ON' : 'OFF',
+      {
+        font: 'bold 8pt Arial',
+        fill: this.reducedMotionMode ? '#FF4444' : '#666666',
+        align: 'right'
+      }
+    );
+    scene.reducedMotionStatus.anchor.setTo(1, 0.5);
+    scene.reducedMotionStatus.visible = false;
+
+    // === AUDIO CAPTIONS SECTION ===
+    // Audio Captions Toggle Box (simple rectangle)
+    scene.audioCaptionsButton = scene.add.graphics(0, 0);
+    scene.audioCaptionsButton.beginFill(this.audioCaptionsMode ? 0xFF4444 : 0x000000, 0.8);
+    scene.audioCaptionsButton.drawRoundedRect(0.04 * WIDTH, 0.74 * HEIGHT, 15, 15, 3);
+    scene.audioCaptionsButton.endFill();
+    scene.audioCaptionsButton.inputEnabled = true;
+    scene.audioCaptionsButton.input.useHandCursor = true;
+    scene.audioCaptionsButton.events.onInputDown.add(function() {
+      ADAMenu.toggleAudioCaptions(scene);
+    }, scene);
+    scene.audioCaptionsButton.visible = false;
+
+    // Audio Captions Label
+    scene.audioCaptionsLabel = scene.add.text(
+      0.065 * WIDTH,
+      0.748 * HEIGHT,
+      'Audio Captions (A)',
+      {
+        font: '8pt Arial',
+        fill: '#FFFFFF',
+        align: 'left'
+      }
+    );
+    scene.audioCaptionsLabel.anchor.setTo(0, 0.5);
+    scene.audioCaptionsLabel.visible = false;
+
+    // Audio Captions Status
+    scene.audioCaptionsStatus = scene.add.text(
+      0.27 * WIDTH,
+      0.748 * HEIGHT,
+      this.audioCaptionsMode ? 'ON' : 'OFF',
+      {
+        font: 'bold 8pt Arial',
+        fill: this.audioCaptionsMode ? '#FF4444' : '#666666',
+        align: 'right'
+      }
+    );
+    scene.audioCaptionsStatus.anchor.setTo(1, 0.5);
+    scene.audioCaptionsStatus.visible = false;
+
     // === CLOSE BUTTON ===
     // Create a simple clickable X close button
     scene.adaCloseButton = scene.add.graphics(0, 0);
     scene.adaCloseButton.beginFill(0xFF4444, 0.8);
-    scene.adaCloseButton.drawCircle(0.27 * WIDTH, 0.57 * HEIGHT, 15);
+    scene.adaCloseButton.drawCircle(0.27 * WIDTH, 0.40 * HEIGHT, 15);
     scene.adaCloseButton.endFill();
     scene.adaCloseButton.inputEnabled = true;
     scene.adaCloseButton.input.useHandCursor = true;
@@ -515,7 +690,7 @@ var ADAMenu = {
 
     scene.adaCloseText = scene.add.text(
       0.27 * WIDTH,
-      0.57 * HEIGHT,
+      0.40 * HEIGHT,
       'X',
       {
         font: 'bold 10pt Arial',
@@ -536,6 +711,21 @@ var ADAMenu = {
     scene.contrastKey = scene.input.keyboard.addKey(Phaser.Keyboard.H);
     scene.contrastKey.onDown.add(function() {
       ADAMenu.toggleHighContrast(scene);
+    }, scene);
+
+    scene.textSizeKey = scene.input.keyboard.addKey(Phaser.Keyboard.S);
+    scene.textSizeKey.onDown.add(function() {
+      ADAMenu.toggleTextSize(scene);
+    }, scene);
+
+    scene.reducedMotionKey = scene.input.keyboard.addKey(Phaser.Keyboard.M);
+    scene.reducedMotionKey.onDown.add(function() {
+      ADAMenu.toggleReducedMotion(scene);
+    }, scene);
+
+    scene.audioCaptionsKey = scene.input.keyboard.addKey(Phaser.Keyboard.A);
+    scene.audioCaptionsKey.onDown.add(function() {
+      ADAMenu.toggleAudioCaptions(scene);
     }, scene);
   },
 
@@ -558,6 +748,15 @@ var ADAMenu = {
     scene.contrastButton.visible = visible;
     scene.contrastLabel.visible = visible;
     scene.contrastStatus.visible = visible;
+    scene.textSizeButton.visible = visible;
+    scene.textSizeLabel.visible = visible;
+    scene.textSizeStatus.visible = visible;
+    scene.reducedMotionButton.visible = visible;
+    scene.reducedMotionLabel.visible = visible;
+    scene.reducedMotionStatus.visible = visible;
+    scene.audioCaptionsButton.visible = visible;
+    scene.audioCaptionsLabel.visible = visible;
+    scene.audioCaptionsStatus.visible = visible;
     scene.adaCloseButton.visible = visible;
     scene.adaCloseText.visible = visible;
 
@@ -568,7 +767,7 @@ var ADAMenu = {
 
     // Announce menu state
     if (visible && TTSManager.enabled) {
-      TTSManager.speak("Accessibility menu opened. Use T for text to speech, C for colorblind support, H for high contrast");
+      TTSManager.speak("Accessibility menu opened. Press keys T, C, H, S, M, or A to toggle features");
     }
   },
 
@@ -588,6 +787,15 @@ var ADAMenu = {
     scene.contrastButton.visible = false;
     scene.contrastLabel.visible = false;
     scene.contrastStatus.visible = false;
+    scene.textSizeButton.visible = false;
+    scene.textSizeLabel.visible = false;
+    scene.textSizeStatus.visible = false;
+    scene.reducedMotionButton.visible = false;
+    scene.reducedMotionLabel.visible = false;
+    scene.reducedMotionStatus.visible = false;
+    scene.audioCaptionsButton.visible = false;
+    scene.audioCaptionsLabel.visible = false;
+    scene.audioCaptionsStatus.visible = false;
     scene.adaCloseButton.visible = false;
     scene.adaCloseText.visible = false;
 
@@ -609,7 +817,7 @@ var ADAMenu = {
     if (scene.ttsToggleButton) {
       scene.ttsToggleButton.clear();
       scene.ttsToggleButton.beginFill(TTSManager.enabled ? 0xFF4444 : 0x000000, 0.8);
-      scene.ttsToggleButton.drawRoundedRect(0.04 * WIDTH, 0.61 * HEIGHT, 15, 15, 3);
+      scene.ttsToggleButton.drawRoundedRect(0.04 * WIDTH, 0.44 * HEIGHT, 15, 15, 3);
       scene.ttsToggleButton.endFill();
     }
 
@@ -648,7 +856,7 @@ var ADAMenu = {
     if (scene.colorBlindButton) {
       scene.colorBlindButton.clear();
       scene.colorBlindButton.beginFill(this.colorBlindMode > 0 ? 0xFF4444 : 0x000000, 0.8);
-      scene.colorBlindButton.drawRoundedRect(0.04 * WIDTH, 0.67 * HEIGHT, 15, 15, 3);
+      scene.colorBlindButton.drawRoundedRect(0.04 * WIDTH, 0.50 * HEIGHT, 15, 15, 3);
       scene.colorBlindButton.endFill();
     }
 
@@ -747,7 +955,7 @@ var ADAMenu = {
     if (scene.contrastButton) {
       scene.contrastButton.clear();
       scene.contrastButton.beginFill(this.highContrastMode ? 0xFF4444 : 0x000000, 0.8);
-      scene.contrastButton.drawRoundedRect(0.04 * WIDTH, 0.73 * HEIGHT, 15, 15, 3);
+      scene.contrastButton.drawRoundedRect(0.04 * WIDTH, 0.56 * HEIGHT, 15, 15, 3);
       scene.contrastButton.endFill();
     }
 
@@ -769,14 +977,230 @@ var ADAMenu = {
     if (TTSManager.enabled) {
       TTSManager.speak(this.highContrastMode ? "High contrast enabled" : "High contrast disabled");
     }
+  },
+
+  // Toggle Text Size - cycles through different sizes
+  toggleTextSize: function(scene) {
+    // Cycle through text size modes: Normal -> Large -> X-Large -> Normal
+    this.textSizeMode = (this.textSizeMode + 1) % this.textSizeModes.length;
+    
+    var multiplier = this.textSizeMultipliers[this.textSizeMode];
+    console.log('Text Size Toggled:', this.textSizeModes[this.textSizeMode], 'Multiplier:', multiplier);
+    
+    // Update toggle box color
+    if (scene.textSizeButton) {
+      scene.textSizeButton.clear();
+      scene.textSizeButton.beginFill(this.textSizeMode > 0 ? 0xFF4444 : 0x000000, 0.8);
+      scene.textSizeButton.drawRoundedRect(0.04 * WIDTH, 0.62 * HEIGHT, 15, 15, 3);
+      scene.textSizeButton.endFill();
+    }
+
+    // Update status text to show current size
+    if (scene.textSizeStatus) {
+      scene.textSizeStatus.setText(this.textSizeModes[this.textSizeMode]);
+      scene.textSizeStatus.fill = this.textSizeMode > 0 ? '#FF4444' : '#666666';
+    }
+
+    // Apply text size to all text in the scene
+    this.applyTextSize(scene);
+
+    // Play audio feedback
+    if (AudioManager) {
+      AudioManager.playSound("bloop_sfx", scene);
+    }
+
+    // Announce state change with specific size
+    if (TTSManager.enabled) {
+      var message = "Text size: " + this.textSizeModes[this.textSizeMode];
+      TTSManager.speak(message);
+    }
+
+    // Restart the scene to apply new text sizes from TextStyle getters
+    console.log('Restarting scene to apply new text size');
+    var currentState = scene.state.current;
+    scene.state.restart(true);
+  },
+
+  // Apply text size multiplier to all text objects in the scene
+  applyTextSize: function(scene) {
+    var multiplier = this.textSizeMultipliers[this.textSizeMode];
+    
+    // Store the multiplier globally so new text can use it
+    // TextStyle getters will automatically use this value
+    window.ADATextSizeMultiplier = multiplier;
+    console.log('Applying text size, multiplier:', multiplier, 'to scene:', scene.key);
+
+    var textCount = 0;
+    
+    // Recursive function to find all text objects including those in groups
+    var updateTextRecursive = function(parent) {
+      if (!parent || !parent.children) return;
+      
+      for (var i = 0; i < parent.children.length; i++) {
+        var child = parent.children[i];
+        
+        // Check if it's a text object
+        if (child && (child.type === Phaser.TEXT || child instanceof Phaser.Text)) {
+          textCount++;
+          // Store original font size if not already stored
+          if (!child._originalFontSize) {
+            // Parse the font size from the font string (e.g., "12pt Arial")
+            var fontMatch = child.font.match(/(\d+)pt/);
+            if (fontMatch) {
+              child._originalFontSize = parseInt(fontMatch[1]);
+            }
+          }
+          
+          // Apply the new size
+          if (child._originalFontSize) {
+            var newSize = Math.round(child._originalFontSize * multiplier);
+            child.font = child.font.replace(/\d+pt/, newSize + 'pt');
+            child.fontSize = newSize;
+            console.log('Updated text:', child._originalFontSize + 'pt ->', newSize + 'pt');
+            // Force text to update
+            if (child.updateText) {
+              child.updateText();
+            }
+          }
+        }
+        
+        // Recursively check groups
+        if (child && child.children && child.children.length > 0) {
+          updateTextRecursive(child);
+        }
+      }
+    };
+    
+    // Start with scene.world or scene.stage
+    if (scene && scene.world) {
+      updateTextRecursive(scene.world);
+    } else if (scene && scene.stage) {
+      updateTextRecursive(scene.stage);
+    }
+    
+    console.log('Updated', textCount, 'text objects');
+  },
+
+  // Toggle Reduced Motion Mode
+  toggleReducedMotion: function(scene) {
+    this.reducedMotionMode = !this.reducedMotionMode;
+    
+    console.log('Reduced Motion Toggled:', this.reducedMotionMode ? 'ON' : 'OFF');
+    
+    // Update toggle box color
+    if (scene.reducedMotionButton) {
+      scene.reducedMotionButton.clear();
+      scene.reducedMotionButton.beginFill(this.reducedMotionMode ? 0xFF4444 : 0x000000, 0.8);
+      scene.reducedMotionButton.drawRoundedRect(0.04 * WIDTH, 0.68 * HEIGHT, 15, 15, 3);
+      scene.reducedMotionButton.endFill();
+    }
+
+    // Update status text
+    if (scene.reducedMotionStatus) {
+      scene.reducedMotionStatus.setText(this.reducedMotionMode ? 'ON' : 'OFF');
+      scene.reducedMotionStatus.fill = this.reducedMotionMode ? '#FF4444' : '#666666';
+    }
+
+    // Store globally for game objects to check
+    window.ADAReducedMotion = this.reducedMotionMode;
+
+    // Handle tweens in the scene
+    if (scene && scene.tweens) {
+      var tweenCount = scene.tweens.getAll().length;
+      console.log('Scene has', tweenCount, 'active tweens');
+      if (this.reducedMotionMode) {
+        // Stop all tweens when reduced motion is enabled
+        scene.tweens.removeAll();
+        console.log('All tweens stopped');
+      } else {
+        // Restart tweens by restarting the current scene
+        console.log('Restarting scene to restore animations');
+        var currentState = scene.state.current;
+        scene.state.restart(true);
+      }
+    }
+
+    // Play audio feedback
+    if (AudioManager) {
+      AudioManager.playSound("bloop_sfx", scene);
+    }
+
+    // Announce state change
+    if (TTSManager.enabled) {
+      TTSManager.speak(this.reducedMotionMode ? "Reduced motion enabled" : "Reduced motion disabled");
+    }
+  },
+
+  // Toggle Audio Captions Mode
+  toggleAudioCaptions: function(scene) {
+    this.audioCaptionsMode = !this.audioCaptionsMode;
+    
+    // Update toggle box color
+    if (scene.audioCaptionsButton) {
+      scene.audioCaptionsButton.clear();
+      scene.audioCaptionsButton.beginFill(this.audioCaptionsMode ? 0xFF4444 : 0x000000, 0.8);
+      scene.audioCaptionsButton.drawRoundedRect(0.04 * WIDTH, 0.74 * HEIGHT, 15, 15, 3);
+      scene.audioCaptionsButton.endFill();
+    }
+
+    // Update status text
+    if (scene.audioCaptionsStatus) {
+      scene.audioCaptionsStatus.setText(this.audioCaptionsMode ? 'ON' : 'OFF');
+      scene.audioCaptionsStatus.fill = this.audioCaptionsMode ? '#FF4444' : '#666666';
+    }
+
+    // Store globally for caption system to check
+    window.ADAAudioCaptions = this.audioCaptionsMode;
+
+    // Play audio feedback
+    if (AudioManager) {
+      AudioManager.playSound("bloop_sfx", scene);
+    }
+
+    // Announce state change
+    if (TTSManager.enabled) {
+      TTSManager.speak(this.audioCaptionsMode ? "Audio captions enabled" : "Audio captions disabled");
+    }
   }
 };
+
+// Initialize global ADA variables
+if (typeof window.ADATextSizeMultiplier === 'undefined') {
+  window.ADATextSizeMultiplier = 1.0;
+}
+if (typeof window.ADAReducedMotion === 'undefined') {
+  window.ADAReducedMotion = false;
+}
+if (typeof window.ADAAudioCaptions === 'undefined') {
+  window.ADAAudioCaptions = false;
+}
 
 // Initialize TTS when the script loads
 window.addEventListener('load', function() {
   TTSManager.init();
 });
 
+// Helper function to create tweens that respect reduced motion mode
+function createAccessibleTween(game, target) {
+  // Check if reduced motion is enabled
+  if (window.ADAReducedMotion) {
+    // Return a mock tween object that does nothing but maintains the API
+    return {
+      to: function() { return this; },
+      from: function() { return this; },
+      yoyo: function() { return this; },
+      loop: function() { return this; },
+      start: function() { return this; },
+      stop: function() { return this; },
+      pause: function() { return this; },
+      resume: function() { return this; }
+    };
+  }
+  // If reduced motion is disabled, create normal tween
+  return game.add.tween(target);
+}
+
 // Export for global access
 window.TTSManager = TTSManager;
 window.ADAMenu = ADAMenu;
+window.createAccessibleTween = createAccessibleTween;

@@ -58,8 +58,8 @@ var PPIntroState = {
       0.58 * HEIGHT,
       "speechbox_2"
     );
-    this.speechBox1.scale.setTo(-1.0, -1.0);
     this.speechBox1.anchor.setTo(0.44, 0.5);
+    scaleForTextSize(this.speechBox1, -1.0, -1.0);
 
     // Speech Text
     this.speechText1 = this.add.text(
@@ -107,12 +107,19 @@ var PPIntroState = {
     );
     this.nextButton.anchor.setTo(0.5, 0.5);
     this.nextButton.visible = false;
-    this.add
-      .tween(this.nextButton.scale)
+    createAccessibleTween(this, this.nextButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
 
+    // Add spacebar support for next button
+    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spaceKey.onDown.add(function() {
+      if (this.nextButton && this.nextButton.visible) {
+        this.nextButton.onInputDown.dispatch();
+      }
+    }, this);
+    
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
@@ -139,13 +146,11 @@ var PPIntroState = {
 
     // Start Animation
     this.nextDelay = 1000;
-    this.animationSpeed = 500;
+    this.animationSpeed = window.ADAReducedMotion ? 0 : 500;
 
-    this.add
-      .tween(this.speechText1.scale)
+    createAccessibleTween(this, this.speechText1.scale)
       .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
-    this.add
-      .tween(this.speechBox1.scale)
+    createAccessibleTween(this, this.speechBox1.scale)
       .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
     this.time.events.add(
       this.nextDelay,
@@ -199,14 +204,11 @@ var PPIntroState = {
         this.speechText2.visible = true;
         this.wetlandsSprite.visible = true;
 
-        this.add
-          .tween(this.speechText2.scale)
+        createAccessibleTween(this, this.speechText2.scale)
           .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
-        this.add
-          .tween(this.speechBox1.scale)
+        createAccessibleTween(this, this.speechBox1.scale)
           .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
-        this.add
-          .tween(this.wetlandsSprite.scale)
+        createAccessibleTween(this, this.wetlandsSprite.scale)
           .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
 
         this.time.events.add(
@@ -224,11 +226,9 @@ var PPIntroState = {
         this.professorSprite3.visible = true;
         this.speechText3.visible = true;
 
-        this.add
-          .tween(this.speechText3.scale)
+        createAccessibleTween(this, this.speechText3.scale)
           .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
-        this.add
-          .tween(this.speechBox1.scale)
+        createAccessibleTween(this, this.speechBox1.scale)
           .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
 
         this.time.events.add(
