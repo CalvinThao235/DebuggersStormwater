@@ -140,6 +140,7 @@ var FFIntroState = {
       0,
       1
     );
+    
     this.pauseButton.scale.setTo(0.75);
     // Mute button
     createMuteButton(this);
