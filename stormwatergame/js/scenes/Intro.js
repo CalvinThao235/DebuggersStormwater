@@ -209,8 +209,8 @@ var IntroState = {
       this.state.start("PauseState");
     };
     this.pauseButton = this.add.button(
-      0.892 * WIDTH,
-      0.185 * HEIGHT,
+      0.01892 * WIDTH,
+      0.01185 * HEIGHT,
       "button_pause",
       onPause,
       this,
