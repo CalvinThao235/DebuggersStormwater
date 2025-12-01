@@ -28,7 +28,8 @@ var FFScoreState = {
 
     // Speech Box
     this.speechBox = this.add.sprite(0.32 * WIDTH, 0.5 * HEIGHT, "speechbox_5");
-    this.speechBox.anchor.setTo(0.44, 0.5);
+    this.speechBox.anchor.setTo(0.5, 0.5);
+    scaleForTextSize(this.speechBox, 1.0, 1.0);
 
     // Score
     this.scoreText = this.add.text(
@@ -55,8 +56,7 @@ var FFScoreState = {
       1
     );
     this.homeButton.anchor.setTo(0.5, 0.5);
-    this.add
-      .tween(this.homeButton.scale)
+    createAccessibleTween(this, this.homeButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
@@ -72,8 +72,7 @@ var FFScoreState = {
       1
     );
     this.replayButton.anchor.setTo(0.5, 0.5);
-    this.add
-      .tween(this.replayButton.scale)
+    createAccessibleTween(this, this.replayButton.scale)
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
@@ -88,13 +87,11 @@ var FFScoreState = {
     TTSManager.speakGameText(FFGameData.finalScore(FFGame.score));
 
     // Start Animation
-    this.animationSpeed = 500;
+    this.animationSpeed = window.ADAReducedMotion ? 0 : 500;
 
-    this.add
-      .tween(this.scoreText.scale)
+    createAccessibleTween(this, this.scoreText.scale)
       .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
-    this.add
-      .tween(this.speechBox.scale)
+    createAccessibleTween(this, this.speechBox.scale)
       .from({ x: 0.0, y: 0.0 }, this.animationSpeed, "Elastic", true);
 
     // Reset PPGame

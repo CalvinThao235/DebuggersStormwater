@@ -33,8 +33,7 @@ var FFGameState = {
       );
       outlineSprite.anchor.setTo(0.5, 0.5);
       outlineSprite.scale.setTo(spriteData.scale.x, spriteData.scale.y);
-      this.add
-        .tween(outlineSprite)
+      createAccessibleTween(this, outlineSprite)
         .to({ alpha: 0.1 }, 800, "Linear", true, 0, -1, true);
       this.topLayer.add(outlineSprite);
 
@@ -186,8 +185,7 @@ var FFGameState = {
     );
     this.fixItButton.anchor.setTo(0.5, 0.5);
     this.questionBoxGroup.add(this.fixItButton);
-    this.add
-      .tween(this.fixItButton.scale)
+    createAccessibleTween(this, this.fixItButton.scale)
       .to({ x: 0.9, y: 0.9 }, 600, "Linear", true, 0, -1, true);
 
     this.itsOkButton = this.add.button(
@@ -204,8 +202,7 @@ var FFGameState = {
     );
     this.itsOkButton.anchor.setTo(0.5, 0.5);
     this.questionBoxGroup.add(this.itsOkButton);
-    this.add
-      .tween(this.itsOkButton.scale)
+    createAccessibleTween(this, this.itsOkButton.scale)
       .to({ x: 0.9, y: 0.9 }, 600, "Linear", true, 0, -1, true);
 
     this.questionImageSprite = this.add.sprite(
@@ -292,8 +289,7 @@ var FFGameState = {
     );
     this.resultsNextButton.anchor.setTo(0.5, 0.5);
     this.resultsBoxGroup.add(this.resultsNextButton);
-    this.add
-      .tween(this.resultsNextButton.scale)
+    createAccessibleTween(this, this.resultsNextButton.scale)
       .to({ x: 0.9, y: 0.9 }, 600, "Linear", true, 0, -1, true);
 
     // Pause Button
@@ -337,9 +333,9 @@ var FFGameState = {
 
     this.setOptionsClickable(false);
     this.questionBoxGroup.visible = true;
-    this.add
-      .tween(this.questionBoxGroup.scale)
-      .from({ x: 0.5, y: 0.5 }, 500, "Elastic", true);
+    var animSpeed = window.ADAReducedMotion ? 0 : 500;
+    createAccessibleTween(this, this.questionBoxGroup.scale)
+      .from({ x: 0.5, y: 0.5 }, animSpeed, "Elastic", true);
 
     var option = FFGame.options[this.currentQuestionId];
     var data = FFGameData.options[option.id];
@@ -374,9 +370,9 @@ var FFGameState = {
     );
     this.resultsBoxGroup.visible = true;
     this.resultsNextButton.visible = false;
-    this.add
-      .tween(this.resultsBoxGroup.scale)
-      .from({ x: 0.5, y: 0.5 }, 500, "Elastic", true);
+    var animSpeed = window.ADAReducedMotion ? 0 : 500;
+    createAccessibleTween(this, this.resultsBoxGroup.scale)
+      .from({ x: 0.5, y: 0.5 }, animSpeed, "Elastic", true);
     this.time.events.add(
       1000,
       function () {
