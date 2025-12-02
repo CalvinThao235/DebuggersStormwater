@@ -45,10 +45,12 @@ var TitleState = {
       .yoyo(true, 0)
       .loop(true);
 
-    // Add spacebar support for play button
-    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    // Add spacebar support for play button (keycode 32)
+    this.spaceKey = this.input.keyboard.addKey(32);
     this.spaceKey.onDown.add(function() {
-      this.playButton.onInputDown.dispatch();
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        this.playButtonActions.onClick.call(this);
+      }
     }, this);
 
     // Mute button

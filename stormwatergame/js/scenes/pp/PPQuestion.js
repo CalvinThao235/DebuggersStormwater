@@ -114,10 +114,13 @@ var PPQuestionState = {
       }
     }, this);
     
-    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spaceKey = this.input.keyboard.addKey(32);
     this.spaceKey.onDown.add(function() {
-      if (this.optionButtons && this.optionButtons[this.selectedOptionIndex]) {
-        this.optionButtons[this.selectedOptionIndex].onInputDown.dispatch();
+      if ((!this.adaMenuBG || !this.adaMenuBG.visible) && this.optionButtons && this.optionButtons[this.selectedOptionIndex]) {
+        var selectedButton = this.optionButtons[this.selectedOptionIndex];
+        if (selectedButton && selectedButton.onInputUp) {
+          selectedButton.onInputUp.dispatch(selectedButton, this.input.activePointer);
+        }
       }
     }, this);
 

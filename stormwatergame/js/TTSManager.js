@@ -384,9 +384,10 @@ var ADAMenu = {
       ADAMenu.toggleTTS(scene);
     }, scene);
 
-    // Add backslash key for menu toggle
-    scene.adaMenuKey = scene.input.keyboard.addKey(Phaser.Keyboard.BACKSLASH);
+    // Add backslash key for menu toggle (keycode 220)
+    scene.adaMenuKey = scene.input.keyboard.addKey(220);
     scene.adaMenuKey.onDown.add(function() {
+      console.log('Backslash pressed - toggling ADA menu');
       ADAMenu.toggleMenu.call(scene);
     }, scene);
 

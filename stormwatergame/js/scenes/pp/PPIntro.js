@@ -112,11 +112,11 @@ var PPIntroState = {
       .yoyo(true, 0)
       .loop(true);
 
-    // Add spacebar support for next button
-    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    // Add spacebar support for next button (keycode 32)
+    this.spaceKey = this.input.keyboard.addKey(32);
     this.spaceKey.onDown.add(function() {
-      if (this.nextButton && this.nextButton.visible) {
-        this.nextButton.onInputDown.dispatch();
+      if ((!this.adaMenuBG || !this.adaMenuBG.visible) && this.nextButton && this.nextButton.visible) {
+        this.nextButtonActions.onClick.call(this);
       }
     }, this);
     
