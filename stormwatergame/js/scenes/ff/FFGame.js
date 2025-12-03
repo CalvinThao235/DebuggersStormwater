@@ -12,6 +12,11 @@ var FFGameState = {
     // Options
     this.currentQuestionId = 0;
     this.optionSprites = [];
+    
+    // Keyboard navigation state
+    this.selectedSiteIndex = 0;
+    this.selectedQuestionButton = 0; // 0 = Fix It, 1 = It's OK
+    this.navigationMode = 'sites'; // 'sites', 'question', 'result'
 
     // Audio
     AudioManager.playSong("ff_music", this);
@@ -316,6 +321,22 @@ var FFGameState = {
     // ADA menu button
     ADAMenu.createADAButton(this);
 
+    // Keyboard Navigation Setup
+    this.leftKey = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+    this.rightKey = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+    this.upKey = this.input.keyboard.addKey(Phaser.Keyboard.UP);
+    this.downKey = this.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+    this.spaceKey = this.input.keyboard.addKey(32);
+    
+    this.leftKey.onDown.add(this.handleLeftKey, this);
+    this.rightKey.onDown.add(this.handleRightKey, this);
+    this.upKey.onDown.add(this.handleUpKey, this);
+    this.downKey.onDown.add(this.handleDownKey, this);
+    this.spaceKey.onDown.add(this.handleSpaceKey, this);
+    
+    // Initialize site selection
+    this.updateSiteHighlight();
+
     // Speak initial instruction
     TTSManager.speakGameText("Look at the neighborhood activities. Click on any activity to decide if it's okay or needs to be fixed.", { delay: 500 });
   },
@@ -333,6 +354,10 @@ var FFGameState = {
 
     this.setOptionsClickable(false);
     this.questionBoxGroup.visible = true;
+    this.navigationMode = 'question';
+    this.selectedQuestionButton = 0;
+    this.updateQuestionHighlight();
+    
     var animSpeed = window.ADAReducedMotion ? 0 : 500;
     createAccessibleTween(this, this.questionBoxGroup.scale)
       .from({ x: 0.5, y: 0.5 }, animSpeed, "Elastic", true);
@@ -351,6 +376,11 @@ var FFGameState = {
     AudioManager.playSound("bloop_sfx", this);
 
     this.questionBoxGroup.visible = false;
+    this.navigationMode = 'result';
+    
+    // Reset button tints
+    this.fixItButton.tint = 0xFFFFFF;
+    this.itsOkButton.tint = 0xFFFFFF;
 
     var option = FFGame.options[this.currentQuestionId];
     var data = FFGameData.options[option.id];
@@ -437,6 +467,8 @@ var FFGameState = {
 
     this.resultsBoxGroup.visible = false;
     this.setOptionsClickable(true);
+    this.navigationMode = 'sites';
+    this.updateSiteHighlight();
 
     FFGame.completed++;
     if (FFGame.completed >= FFGame.options.length) {
@@ -454,6 +486,106 @@ var FFGameState = {
       // this.finishedButton = this.add.button(0.9 * WIDTH, 0.85 * HEIGHT, "button_play", onClick, this, 0, 0, 1);
       // this.finishedButton.anchor.setTo(0.5, 0.5);
       // this.add.tween(this.finishedButton.scale).to({ x: 1.1, y: 1.1 }, 600, "Linear", true, 0, -1, true);
+    }
+  },
+  handleLeftKey: function () {
+    if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+      if (this.navigationMode === 'sites') {
+        this.moveSiteSelection(-1);
+      } else if (this.navigationMode === 'question') {
+        this.selectedQuestionButton = 0;
+        this.updateQuestionHighlight();
+      }
+    }
+  },
+  handleRightKey: function () {
+    if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+      if (this.navigationMode === 'sites') {
+        this.moveSiteSelection(1);
+      } else if (this.navigationMode === 'question') {
+        this.selectedQuestionButton = 1;
+        this.updateQuestionHighlight();
+      }
+    }
+  },
+  handleUpKey: function () {
+    if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+      if (this.navigationMode === 'sites') {
+        this.moveSiteSelection(-1);
+      } else if (this.navigationMode === 'question') {
+        this.selectedQuestionButton = 0;
+        this.updateQuestionHighlight();
+      }
+    }
+  },
+  handleDownKey: function () {
+    if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+      if (this.navigationMode === 'sites') {
+        this.moveSiteSelection(1);
+      } else if (this.navigationMode === 'question') {
+        this.selectedQuestionButton = 1;
+        this.updateQuestionHighlight();
+      }
+    }
+  },
+  handleSpaceKey: function () {
+    if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+      if (this.navigationMode === 'sites') {
+        // Select the current site
+        this.currentQuestionId = this.selectedSiteIndex;
+        this.startQuestion();
+      } else if (this.navigationMode === 'question') {
+        // Select Fix It (0) or It's OK (1)
+        this.startResult(this.selectedQuestionButton === 0);
+      } else if (this.navigationMode === 'result') {
+        // Continue from result
+        if (this.resultsNextButton.visible) {
+          this.closeResult();
+        }
+      }
+    }
+  },
+  moveSiteSelection: function (direction) {
+    var startIndex = this.selectedSiteIndex;
+    var attempts = 0;
+    
+    do {
+      this.selectedSiteIndex += direction;
+      if (this.selectedSiteIndex < 0) {
+        this.selectedSiteIndex = this.optionSprites.length - 1;
+      } else if (this.selectedSiteIndex >= this.optionSprites.length) {
+        this.selectedSiteIndex = 0;
+      }
+      attempts++;
+    } while (!this.optionSprites[this.selectedSiteIndex].enabled && attempts < this.optionSprites.length);
+    
+    this.updateSiteHighlight();
+  },
+  updateSiteHighlight: function () {
+    // Reset all outlines to default pulsing
+    for (var i = 0; i < this.optionSprites.length; i++) {
+      if (this.optionSprites[i].enabled) {
+        this.optionSprites[i].outline.tint = 0xFFFFFF;
+        this.optionSprites[i].outline.alpha = 1;
+      }
+    }
+    
+    // Highlight selected site with bright lime green
+    if (this.optionSprites[this.selectedSiteIndex].enabled) {
+      this.optionSprites[this.selectedSiteIndex].outline.tint = 0x00FF00;
+      this.optionSprites[this.selectedSiteIndex].outline.alpha = 1;
+    }
+  },
+  updateQuestionHighlight: function () {
+    // Reset both buttons
+    this.fixItButton.tint = 0xFFFFFF;
+    this.itsOkButton.tint = 0xFFFFFF;
+    
+    // Highlight selected button with bright cyan
+    if (this.selectedQuestionButton === 0) {
+      this.fixItButton.tint = 0x00FFFF;
+    } else {
+      this.itsOkButton.tint = 0x00FFFF;
     }
   },
 };

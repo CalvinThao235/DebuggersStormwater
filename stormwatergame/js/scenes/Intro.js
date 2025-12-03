@@ -205,10 +205,12 @@ var IntroState = {
     );
     
     // Add spacebar support for next button
-    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spaceKey = this.input.keyboard.addKey(32);
     this.spaceKey.onDown.add(function() {
-      if (this.nextButton && this.nextButton.visible) {
-        this.nextButton.onInputDown.dispatch();
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        if (this.nextButton && this.nextButton.visible) {
+          this.nextButtonActions.onClick.call(this);
+        }
       }
     }, this);
     
