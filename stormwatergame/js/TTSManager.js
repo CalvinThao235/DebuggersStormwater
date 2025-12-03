@@ -310,6 +310,9 @@ var TTSManager = {
 
   // Helper method to speak game text with appropriate timing
   speakGameText: function(text, options = {}) {
+    // Only auto-speak if TTS is enabled
+    if (!window.ADATTSEnabled) return;
+    
     const gameOptions = {
       rate: 0.8,  // Slightly slower for educational content
       ...options
@@ -341,7 +344,7 @@ var ADAMenu = {
     // Create a simple circular background for the wheelchair icon
     scene.adaButton = scene.add.graphics(0, 0);
     scene.adaButton.beginFill(0x28A745, 0.9);
-    scene.adaButton.drawCircle(0.03 * WIDTH, 0.89 * HEIGHT, 20);
+    scene.adaButton.drawCircle(0.05 * WIDTH, 0.87 * HEIGHT, 40);
     scene.adaButton.endFill();
     scene.adaButton.inputEnabled = true;
     scene.adaButton.input.useHandCursor = true;
@@ -351,11 +354,11 @@ var ADAMenu = {
     
     // Add accessibility icon (♿)
     scene.adaButtonIcon = scene.add.text(
-      0.03 * WIDTH,
-      0.89 * HEIGHT,
+      0.05 * WIDTH,
+      0.87 * HEIGHT,
       '♿',
       {
-        font: 'bold 16pt Arial',
+        font: 'bold 32pt Arial',
         fill: '#FFFFFF',
         align: 'center'
       }
@@ -364,11 +367,11 @@ var ADAMenu = {
 
     // Add "ADA Menu" label below button
     scene.adaButtonText = scene.add.text(
-      0.03 * WIDTH,
-      0.89 * HEIGHT + 30,
+      0.05 * WIDTH,
+      0.87 * HEIGHT + 50,
       'ADA Menu',
       {
-        font: 'bold 8pt Arial',
+        font: 'bold 12pt Arial',
         fill: '#28A745',
         align: 'center'
       }
@@ -384,10 +387,42 @@ var ADAMenu = {
       ADAMenu.toggleTTS(scene);
     }, scene);
 
-    // Add backslash key for menu toggle
-    scene.adaMenuKey = scene.input.keyboard.addKey(Phaser.Keyboard.BACKSLASH);
+    // Add backslash key for menu toggle (keycode 220)
+    scene.adaMenuKey = scene.input.keyboard.addKey(220);
     scene.adaMenuKey.onDown.add(function() {
       ADAMenu.toggleMenu.call(scene);
+    }, scene);
+    
+    // Add ESC key for pause menu
+    scene.escKey = scene.input.keyboard.addKey(Phaser.Keyboard.ESC);
+    scene.escKey.onDown.add(function() {
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        if (this.pauseButton && typeof LastState !== 'undefined') {
+          AudioManager.playSound("bloop_sfx", this);
+          this.state.start("PauseState");
+        }
+      }
+    }, scene);
+    
+    // Add P key for pause menu (alternative)
+    scene.pKey = scene.input.keyboard.addKey(Phaser.Keyboard.P);
+    scene.pKey.onDown.add(function() {
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        if (this.pauseButton && typeof LastState !== 'undefined') {
+          AudioManager.playSound("bloop_sfx", this);
+          this.state.start("PauseState");
+        }
+      }
+    }, scene);
+    
+    // Add U key for mute toggle (U for Unmute/Mute)
+    scene.muteKey = scene.input.keyboard.addKey(Phaser.Keyboard.U);
+    scene.muteKey.onDown.add(function() {
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        if (this.muteButton) {
+          muteButtonActions.onClick.call(this);
+        }
+      }
     }, scene);
 
     return scene.adaButton;
@@ -432,7 +467,7 @@ var ADAMenu = {
     // === TTS SECTION ===
     // TTS Toggle Box (simple rectangle)
     scene.ttsToggleButton = scene.add.graphics(0, 0);
-    scene.ttsToggleButton.beginFill(TTSManager.enabled ? 0xFF4444 : 0x000000, 0.8);
+    scene.ttsToggleButton.beginFill(window.ADATTSEnabled ? 0xFF4444 : 0x000000, 0.8);
     scene.ttsToggleButton.drawRoundedRect(0.04 * WIDTH, 0.44 * HEIGHT, 15, 15, 3);
     scene.ttsToggleButton.endFill();
     scene.ttsToggleButton.inputEnabled = true;
@@ -460,10 +495,10 @@ var ADAMenu = {
     scene.ttsStatus = scene.add.text(
       0.27 * WIDTH,
       0.448 * HEIGHT,
-      TTSManager.enabled ? 'ON' : 'OFF',
+      window.ADATTSEnabled ? 'ON' : 'OFF',
       {
         font: 'bold 8pt Arial',
-        fill: TTSManager.enabled ? '#FF4444' : '#666666',
+        fill: window.ADATTSEnabled ? '#FF4444' : '#666666',
         align: 'right'
       }
     );
@@ -810,21 +845,22 @@ var ADAMenu = {
 
   // Toggle TTS and update UI
   toggleTTS: function(scene) {
-    var wasEnabled = TTSManager.enabled;
-    TTSManager.toggle();
+    // Toggle global TTS enabled state
+    window.ADATTSEnabled = !window.ADATTSEnabled;
+    var isEnabled = window.ADATTSEnabled;
     
     // Update toggle box color
     if (scene.ttsToggleButton) {
       scene.ttsToggleButton.clear();
-      scene.ttsToggleButton.beginFill(TTSManager.enabled ? 0xFF4444 : 0x000000, 0.8);
+      scene.ttsToggleButton.beginFill(isEnabled ? 0xFF4444 : 0x000000, 0.8);
       scene.ttsToggleButton.drawRoundedRect(0.04 * WIDTH, 0.44 * HEIGHT, 15, 15, 3);
       scene.ttsToggleButton.endFill();
     }
 
     // Update status text
     if (scene.ttsStatus) {
-      scene.ttsStatus.setText(TTSManager.enabled ? 'ON' : 'OFF');
-      scene.ttsStatus.fill = TTSManager.enabled ? '#FF4444' : '#666666';
+      scene.ttsStatus.setText(isEnabled ? 'ON' : 'OFF');
+      scene.ttsStatus.fill = isEnabled ? '#FF4444' : '#666666';
     }
 
     // Play audio feedback
@@ -832,18 +868,12 @@ var ADAMenu = {
       AudioManager.playSound("bloop_sfx", scene);
     }
 
-    // Announce state change
-    if (TTSManager.enabled && !wasEnabled) {
+    // Announce state change (always speak this announcement regardless of auto-speak setting)
+    if (isEnabled) {
       TTSManager.speak("Text to speech enabled");
-    } else if (!TTSManager.enabled && wasEnabled) {
+    } else {
       // Brief announcement before disabling
-      setTimeout(() => {
-        if (window.speechSynthesis) {
-          const utterance = new SpeechSynthesisUtterance("Text to speech disabled");
-          utterance.rate = 0.8;
-          speechSynthesis.speak(utterance);
-        }
-      }, 100);
+      TTSManager.speak("Text to speech disabled");
     }
   },
 

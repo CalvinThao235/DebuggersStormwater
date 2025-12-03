@@ -90,6 +90,36 @@ var PauseState = {
       .to({ x: 1.1, y: 1.1 }, 600, "Linear", true)
       .yoyo(true, 0)
       .loop(true);
+    
+    // Keyboard controls for pause menu
+    // ESC or P to resume
+    this.escKey = this.input.keyboard.addKey(Phaser.Keyboard.ESC);
+    this.escKey.onDown.add(function() {
+      this.resumeButtonActions.onClick.call(this);
+    }, this);
+    
+    this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
+    this.pKey.onDown.add(function() {
+      this.resumeButtonActions.onClick.call(this);
+    }, this);
+    
+    // R for restart/replay
+    this.rKey = this.input.keyboard.addKey(Phaser.Keyboard.R);
+    this.rKey.onDown.add(function() {
+      this.restartButtonActions.onClick.call(this);
+    }, this);
+    
+    // H for home
+    this.hKey = this.input.keyboard.addKey(Phaser.Keyboard.H);
+    this.hKey.onDown.add(function() {
+      this.homeButtonActions.onClick.call(this);
+    }, this);
+    
+    // Spacebar for resume (default action)
+    this.spaceKey = this.input.keyboard.addKey(32);
+    this.spaceKey.onDown.add(function() {
+      this.resumeButtonActions.onClick.call(this);
+    }, this);
   },
   update: function () {
     updateCloudSprites(this);

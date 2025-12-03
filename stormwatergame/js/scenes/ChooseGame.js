@@ -8,6 +8,9 @@ var ChooseGameState = {
 
     // Clouds
     this.cloudSprites = createCloudSprites(this);
+    
+    // Keyboard navigation state
+    this.selectedGameIndex = 0; // 0 = FF, 1 = PP
 
     // Characters
     this.professorSprite1 = this.add.sprite(
@@ -23,6 +26,7 @@ var ChooseGameState = {
       "speechbox_3"
     );
     this.speechBox1.anchor.setTo(0.44, 0.5);
+    scaleForTextSize(this.speechBox1, 1.0, 1.0);
 
     // Speech Text
     this.speechText1 = this.add.text(
@@ -95,6 +99,54 @@ var ChooseGameState = {
     );
     this.pauseButton.scale.setTo(0.75);
 
+    // Keyboard Navigation Setup
+    this.leftKey = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+    this.rightKey = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+    this.upKey = this.input.keyboard.addKey(Phaser.Keyboard.UP);
+    this.downKey = this.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+    this.spaceKey = this.input.keyboard.addKey(32);
+    
+    this.leftKey.onDown.add(function() {
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        this.selectedGameIndex = 0;
+        this.updateGameHighlight();
+      }
+    }, this);
+    
+    this.rightKey.onDown.add(function() {
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        this.selectedGameIndex = 1;
+        this.updateGameHighlight();
+      }
+    }, this);
+    
+    this.upKey.onDown.add(function() {
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        this.selectedGameIndex = 0;
+        this.updateGameHighlight();
+      }
+    }, this);
+    
+    this.downKey.onDown.add(function() {
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        this.selectedGameIndex = 1;
+        this.updateGameHighlight();
+      }
+    }, this);
+    
+    this.spaceKey.onDown.add(function() {
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        if (this.selectedGameIndex === 0) {
+          this.ffButtonActions.onClick.call(this);
+        } else {
+          this.ppButtonActions.onClick.call(this);
+        }
+      }
+    }, this);
+    
+    // Initialize highlight
+    this.updateGameHighlight();
+
     // Start Animation
     this.animationSpeed = 500;
 
@@ -122,5 +174,17 @@ var ChooseGameState = {
       AudioManager.playSound("bloop_sfx", this);
       this.state.start("PPIntroState");
     },
+  },
+  updateGameHighlight: function () {
+    // Reset both buttons
+    this.ffButton.tint = 0xFFFFFF;
+    this.ppButton.tint = 0xFFFFFF;
+    
+    // Highlight selected button with bright cyan
+    if (this.selectedGameIndex === 0) {
+      this.ffButton.tint = 0x00FFFF;
+    } else {
+      this.ppButton.tint = 0x00FFFF;
+    }
   },
 };

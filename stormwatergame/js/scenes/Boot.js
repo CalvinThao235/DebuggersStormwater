@@ -12,6 +12,9 @@ var BootState = {
     if (typeof window.ADAAudioCaptions === 'undefined') {
       window.ADAAudioCaptions = false;
     }
+    if (typeof window.ADATTSEnabled === 'undefined') {
+      window.ADATTSEnabled = false;
+    }
 
     if (this.game.device.desktop) {
       this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;

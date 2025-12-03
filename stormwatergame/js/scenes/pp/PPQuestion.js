@@ -6,6 +6,11 @@ var PPQuestionState = {
     var level = PPGameData.levels[PPGame.levelId];
     var question = level[PPGame.questionId];
     var options = question.options;
+    
+    // Initialize keyboard navigation arrays
+    this.optionButtons = [];
+    this.optionTweens = [];
+    this.selectedOptionIndex = 0;
 
     // Randomize options
     if (PPGame.optionOrder.length == 0) {
@@ -83,49 +88,85 @@ var PPQuestionState = {
       );
       optionButton.anchor.setTo(0.5, 0.5);
       optionButton.optionIndex = PPGame.optionOrder[i].id;
-      createAccessibleTween(this, optionButton.scale)
+      
+      // Store buttons and tweens for keyboard navigation
+      this.optionButtons.push(optionButton);
+      // Store the tween so we can pause it later
+      var buttonTween = createAccessibleTween(this, optionButton.scale)
         .to({ x: 0.95, y: 0.95 }, 600, "Linear", true)
         .yoyo(true, 0)
         .loop(true);
-      
-      // Store buttons for keyboard navigation
-      if (!this.optionButtons) {
-        this.optionButtons = [];
-      }
-      this.optionButtons.push(optionButton);
+      this.optionTweens.push(buttonTween);
     }
 
     // Add keyboard support for arrow keys and spacebar
-    this.selectedOptionIndex = 0;
-    
     this.leftKey = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     this.leftKey.onDown.add(function() {
-      if (this.optionButtons && this.optionButtons.length > 0) {
-        this.selectedOptionIndex = (this.selectedOptionIndex - 1 + this.optionButtons.length) % this.optionButtons.length;
-        TTSManager.speak("Option " + (this.selectedOptionIndex + 1));
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        if (this.optionButtons && this.optionButtons.length > 0) {
+          this.selectedOptionIndex = (this.selectedOptionIndex - 1 + this.optionButtons.length) % this.optionButtons.length;
+          this.updateOptionHighlight();
+          if (window.ADATTSEnabled) {
+            TTSManager.speak("Option " + (this.selectedOptionIndex + 1) + " of " + this.optionButtons.length);
+          }
+        }
       }
     }, this);
     
     this.rightKey = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
     this.rightKey.onDown.add(function() {
-      if (this.optionButtons && this.optionButtons.length > 0) {
-        this.selectedOptionIndex = (this.selectedOptionIndex + 1) % this.optionButtons.length;
-        TTSManager.speak("Option " + (this.selectedOptionIndex + 1));
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        if (this.optionButtons && this.optionButtons.length > 0) {
+          this.selectedOptionIndex = (this.selectedOptionIndex + 1) % this.optionButtons.length;
+          this.updateOptionHighlight();
+          if (window.ADATTSEnabled) {
+            TTSManager.speak("Option " + (this.selectedOptionIndex + 1) + " of " + this.optionButtons.length);
+          }
+        }
       }
     }, this);
     
-    this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spaceKey = this.input.keyboard.addKey(32);
     this.spaceKey.onDown.add(function() {
-      if (this.optionButtons && this.optionButtons[this.selectedOptionIndex]) {
-        this.optionButtons[this.selectedOptionIndex].onInputDown.dispatch();
+      if (!this.adaMenuBG || !this.adaMenuBG.visible) {
+        if (this.optionButtons && this.optionButtons[this.selectedOptionIndex]) {
+          var selectedButton = this.optionButtons[this.selectedOptionIndex];
+          PPGame.chosenOptionId = selectedButton.optionIndex;
+          PPGame.scoreLock = false;
+          PPGame.optionOrder = [];
+          AudioManager.playSound("bloop_sfx", this);
+          this.state.start("PPRainState");
+        }
       }
     }, this);
 
     // Play music
     AudioManager.playSong("pp_music", this);
+    
+    // Initialize highlight with a small delay to ensure tweens are started
+    this.time.events.add(100, function() {
+      this.updateOptionHighlight();
+    }, this);
 
-    // Speak question prompt
-    TTSManager.speakGameText("Choose the best option to protect our waterways.", { delay: 500 });
+    // Speak question prompt with number of options
+    var optionCount = this.optionButtons.length;
+    TTSManager.speakGameText("Question. Look at the situation shown above. Choose the best option to protect our waterways. " + optionCount + " options available. Use arrow keys to navigate.", { delay: 500 });
   },
-  update: function () {},
+  update: function () {
+    // Continuously apply highlight in update loop
+    if (this.optionButtons && this.optionButtons[this.selectedOptionIndex]) {
+      this.optionButtons[this.selectedOptionIndex].tint = 0x00FFFF;
+    }
+  },
+  updateOptionHighlight: function () {
+    // Reset all buttons
+    for (var i = 0; i < this.optionButtons.length; i++) {
+      this.optionButtons[i].tint = 0xFFFFFF;
+    }
+    
+    // Apply cyan tint to selected button - update loop will maintain it
+    if (this.optionButtons[this.selectedOptionIndex]) {
+      this.optionButtons[this.selectedOptionIndex].tint = 0x00FFFF;
+    }
+  },
 };
