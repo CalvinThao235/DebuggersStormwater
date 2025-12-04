@@ -109,7 +109,7 @@ var PPLevelSelectState = {
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
-      LastState = "PPQuestionState";
+      LastState = "PPLevelSelectState";
       this.state.start("PauseState");
     };
     this.pauseButton = this.add.button(
