@@ -4,6 +4,9 @@ var FFIntroState = {
   preload: function () { },
   create: function () {
     this.subSceneIndex = 0;
+    
+    // Set Restart Point
+    RestartState = "FFIntroState";
 
     // Background
     this.backgroundSprite = this.add.sprite(0, 0, "background_1");
