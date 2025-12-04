@@ -137,7 +137,7 @@ var FFIntroState = {
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
-      LastState = "PPQuestionState";
+      LastState = "FFIntroState";
       this.state.start("PauseState");
     };
     this.pauseButton = this.add.button(
