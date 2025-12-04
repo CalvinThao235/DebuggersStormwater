@@ -1,5 +1,6 @@
 "use strict";
 
+var LastState = "PPIntroState";
 var PPIntroState = {
   preload: function () { },
   create: function () {
@@ -116,7 +117,7 @@ var PPIntroState = {
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
-      LastState = "PPQuestionState";
+      LastState = "PPIntroState";
       this.state.start("PauseState");
     };
     this.pauseButton = this.add.button(
@@ -133,6 +134,9 @@ var PPIntroState = {
 
     // Mute button
     createMuteButton(this);
+
+    // ADA menu button
+    ADAMenu.createADAButton(this);
 
     // Start Animation
     this.nextDelay = 1000;
@@ -151,6 +155,9 @@ var PPIntroState = {
       },
       this
     );
+
+    // Speak first text
+    TTSManager.speakGameText(TextData.ppIntro[0]);
   },
   update: function () {
     updateCloudSprites(this);
@@ -210,6 +217,9 @@ var PPIntroState = {
           },
           this
         );
+        
+        // Speak the text for this scene
+        TTSManager.speakGameText(TextData.ppIntro[1]);
         break;
       case 2:
         this.professorSprite3.visible = true;
@@ -229,8 +239,13 @@ var PPIntroState = {
           },
           this
         );
+        
+        // Speak the text for this scene
+        TTSManager.speakGameText(TextData.ppIntro[2]);
         break;
       case 3:
+        // Stop any ongoing speech when leaving this scene
+        TTSManager.stop();
         this.state.start("PPLevelSelectState");
         break;
     }

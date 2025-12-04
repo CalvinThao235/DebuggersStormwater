@@ -401,8 +401,14 @@ var PPResultState = {
       AudioManager.playSound("wrong_sfx", this);
     }
 
+    // Speak the result text
+    TTSManager.speakGameText(chosenOption.resultUpperText + " " + chosenOption.resultLowerText, { delay: 1000 });
+
     // Mute button
     createMuteButton(this);
+
+    // ADA menu button
+    ADAMenu.createADAButton(this);
 
     // Pause Button
     var onPause = function () {

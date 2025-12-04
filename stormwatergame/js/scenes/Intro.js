@@ -1,5 +1,5 @@
 "use strict";
-
+var LastState = "IntroState";
 var IntroState = {
   preload: function () { },
   create: function () {
@@ -205,7 +205,7 @@ var IntroState = {
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
-      LastState = "PPQuestionState";
+      LastState = "IntroState";
       this.state.start("PauseState");
     };
     this.pauseButton = this.add.button(
@@ -221,6 +221,12 @@ var IntroState = {
     this.pauseButton.scale.setTo(0.75);
     // Mute button
     createMuteButton(this);
+
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
+    // Speak first text
+    TTSManager.speakGameText(TextData.intro[0]);
 
   },
   update: function () {
@@ -285,6 +291,9 @@ var IntroState = {
           },
           this
         );
+
+        // Speak the text for this scene
+        TTSManager.speakGameText(TextData.intro[1]);
         break;
       case 2:
         this.professorSprite3.visible = true;
@@ -313,6 +322,9 @@ var IntroState = {
           },
           this
         );
+
+        // Speak the combined text for this scene
+        TTSManager.speakGameText(TextData.intro[2][0] + " " + TextData.intro[2][1]);
         break;
       case 3:
         this.professorSprite4.visible = true;
@@ -340,6 +352,9 @@ var IntroState = {
           },
           this
         );
+
+        // Speak the combined text for this scene
+        TTSManager.speakGameText(TextData.intro[3][0] + " " + TextData.intro[3][1]);
         break;
       case 4:
         this.professorSprite5.visible = true;
@@ -359,8 +374,13 @@ var IntroState = {
           },
           this
         );
+
+        // Speak the text for this scene
+        TTSManager.speakGameText(TextData.intro[4]);
         break;
       case 5:
+        // Stop any ongoing speech when leaving this scene
+        TTSManager.stop();
         this.state.start("ChooseGameState");
         break;
     }

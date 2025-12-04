@@ -86,6 +86,9 @@ var PPRainState = {
     // Mute button
     createMuteButton(this);
 
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
@@ -124,6 +127,9 @@ var PPRainState = {
 
     // Play sound
     AudioManager.playSound("rain_sfx", this);
+
+    // Speak the rain text
+    TTSManager.speakGameText(TextData.ppRain);
   },
   update: function () {},
   nextButtonActions: {

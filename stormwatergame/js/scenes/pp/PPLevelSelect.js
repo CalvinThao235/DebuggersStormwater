@@ -118,6 +118,12 @@ var PPLevelSelectState = {
     // Mute button
     createMuteButton(this);
 
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
+    // Speak the level select text
+    TTSManager.speakGameText(TextData.ppChoseLevel);
+
     // Start Animation
     this.animationSpeed = 500;
 

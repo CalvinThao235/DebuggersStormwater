@@ -81,6 +81,12 @@ var FFScoreState = {
     // Mute button
     createMuteButton(this);
 
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
+    // Speak the final score
+    TTSManager.speakGameText(FFGameData.finalScore(FFGame.score));
+
     // Start Animation
     this.animationSpeed = 500;
 

@@ -1,5 +1,5 @@
 "use strict";
-
+var LastState = "ChooseGameState";
 var ChooseGameState = {
   preload: function () { },
   create: function () {
@@ -73,10 +73,16 @@ var ChooseGameState = {
     // Mute button
     createMuteButton(this);
 
+    // ADA menu button
+    ADAMenu.createADAButton(this);
+
+    // Speak the choose game text
+    TTSManager.speakGameText(TextData.chooseGame);
+
     // Pause Button
     var onPause = function () {
       AudioManager.playSound("bloop_sfx", this);
-      LastState = "PPQuestionState";
+      LastState = "ChooseGameState";
       this.state.start("PauseState");
     };
     this.pauseButton = this.add.button(
