@@ -313,6 +313,11 @@ var FFGameState = {
 
     this.questionHeaderText.setText(childData.questionTitle);
     this.questionImageSprite.loadTexture(childData.questionImage);
+    
+    // ADDED: Tell keyboard manager to update immediately
+    if (typeof GameKeyboard !== 'undefined') {
+      GameKeyboard.findButtons();
+    }
   },
   startResult: function (fixIt) {
     AudioManager.playSound("bloop_sfx", this);
@@ -394,6 +399,11 @@ var FFGameState = {
       // SFX
       AudioManager.playSound("wrong_sfx", this);
     }
+    
+    // ADDED: Tell keyboard manager to update immediately
+    if (typeof GameKeyboard !== 'undefined') {
+      GameKeyboard.findButtons();
+    }
   },
   closeResult: function () {
     AudioManager.playSound("bloop_sfx", this);
@@ -410,13 +420,11 @@ var FFGameState = {
         },
         this
       );
-
-      // var onClick = function() {
-      //     AudioManager.playSound("bloop_sfx", this);
-      // };
-      // this.finishedButton = this.add.button(0.9 * WIDTH, 0.85 * HEIGHT, "button_play", onClick, this, 0, 0, 1);
-      // this.finishedButton.anchor.setTo(0.5, 0.5);
-      // this.add.tween(this.finishedButton.scale).to({ x: 1.1, y: 1.1 }, 600, "Linear", true, 0, -1, true);
+    }
+    
+    // ADDED: Tell keyboard manager to update immediately
+    if (typeof GameKeyboard !== 'undefined') {
+      GameKeyboard.findButtons();
     }
   },
 };

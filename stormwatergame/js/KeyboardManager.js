@@ -26,6 +26,11 @@ var GameKeyboard = {
         // Set up key event listeners for arrow keys and enter/space
         var self = this;
         document.onkeydown = function(e) {
+            // Prevent spacebar from scrolling the page
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+            }
+            
             if (self.buttons.length === 0) return;
             
             // Check if we're in pause menu for grid navigation
@@ -48,7 +53,7 @@ var GameKeyboard = {
             }
             
             // Enter or Space: Trigger button press action
-            if (e.key === 'Enter' || e.key === ' ') {
+            if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
                 e.preventDefault();
                 self.press(); // Call the action for the currently focused button
             }
@@ -100,10 +105,24 @@ var GameKeyboard = {
     check: function() {
         // Periodically check if the game state has changed, and update buttons
         var self = this;
+        var lastResultsNextVisible = false;
+        
         setInterval(function() {
             if (Game.state.current !== self.currentState) {
                 self.currentState = Game.state.current; // Update the current state
                 self.findButtons(); // Update the list of buttons for the new state
+            }
+            
+            // Special check for FF game Next button appearing
+            if (Game.state.current === 'FFGameState') {
+                var state = Game.state.getCurrentState();
+                if (state && state.resultsNextButton) {
+                    var nextVisible = state.resultsNextButton.visible;
+                    if (nextVisible !== lastResultsNextVisible) {
+                        lastResultsNextVisible = nextVisible;
+                        self.findButtons(); // Refresh buttons when Next button becomes visible
+                    }
+                }
             }
             
             // Keep updating the glow position
@@ -128,8 +147,14 @@ var GameKeyboard = {
         
         // Check if we're in FF game state
         if (Game.state.current === 'FFGameState') {
+            // If results box is visible, show Next button
+            if (state.resultsBoxGroup && state.resultsBoxGroup.visible) {
+                if (state.resultsNextButton && state.resultsNextButton.visible) {
+                    this.buttons.push({btn: state.resultsNextButton, action: 'ff-next'});
+                }
+            }
             // If question box is visible, show Fix It and It's OK buttons
-            if (state.questionBoxGroup && state.questionBoxGroup.visible) {
+            else if (state.questionBoxGroup && state.questionBoxGroup.visible) {
                 if (state.fixItButton) this.buttons.push({btn: state.fixItButton, action: 'ff-fixit'});
                 if (state.itsOkButton) this.buttons.push({btn: state.itsOkButton, action: 'ff-itsok'});
             }
@@ -142,6 +167,22 @@ var GameKeyboard = {
                             btn: optionSprite.clickable, 
                             action: 'ff-option',
                             optionIndex: i
+                        });
+                    }
+                }
+            }
+        }
+        // Check if we're in PP game question state
+        else if (Game.state.current === 'PPQuestionState') {
+            // Look for PP choice buttons
+            if (state.ppChoiceButtons && state.ppChoiceButtons.length > 0) {
+                for (var i = 0; i < state.ppChoiceButtons.length; i++) {
+                    var btn = state.ppChoiceButtons[i];
+                    if (btn && btn.visible) {
+                        this.buttons.push({
+                            btn: btn,
+                            action: 'pp-choice',
+                            optionIndex: btn.optionIndex
                         });
                     }
                 }
@@ -185,20 +226,34 @@ var GameKeyboard = {
             return;
         }
         
-        // Draw glow effect matching button shape
-        var bounds = button.getBounds();
+        // Calculate bounds - use tight bounds for FF game objects
+        var bounds;
+        var isFFOption = buttonData.action === 'ff-option';
+        
+        if (isFFOption && button.width && button.height) {
+            // Use sprite's actual dimensions for FF game objects
+            var worldPos = button.world || button.worldPosition || {x: button.x, y: button.y};
+            bounds = {
+                x: worldPos.x,
+                y: worldPos.y,
+                width: button.width * Math.abs(button.scale.x),
+                height: button.height * Math.abs(button.scale.y)
+            };
+            // Adjust for anchor point
+            bounds.x -= bounds.width * button.anchor.x;
+            bounds.y -= bounds.height * button.anchor.y;
+        } else {
+            // Use getBounds for regular buttons
+            bounds = button.getBounds();
+        }
+        
         var centerX = bounds.x + bounds.width / 2;
         var centerY = bounds.y + bounds.height / 2;
         
-        // Only use circles for actual round buttons (play, pause, home, replay, mute)
-        // Check both the action name and look at actual texture/key name
+        // Determine shape type based on button action and texture
         var circularButtons = ['play', 'pause', 'home', 'replay', 'mute', 'resume', 'restart'];
         var isCircular = circularButtons.indexOf(buttonData.action) !== -1;
         
-        // For FF game sprites, use flexible outline that follows the sprite bounds
-        var isFFOption = buttonData.action === 'ff-option';
-        
-        // Also check the texture key to identify circular buttons by their sprite name
         if (button.key && (button.key.indexOf('button_play') !== -1 || 
                            button.key.indexOf('button_pause') !== -1 ||
                            button.key.indexOf('button_home') !== -1 ||
@@ -207,49 +262,53 @@ var GameKeyboard = {
             isCircular = true;
         }
         
+        // Determine if we should use ellipse based on aspect ratio
+        var aspectRatio = bounds.width / bounds.height;
+        var useEllipse = isFFOption && (aspectRatio < 0.7 || aspectRatio > 1.4);
+        
         // Draw multiple layers for glow effect
         for (var i = 3; i >= 1; i--) {
-            var offset = i * 8;
-            var alpha = 0.3 / i;
+            var offset = i * 6;
+            var alpha = 0.25 / i;
             
-            this.glowGraphics.lineStyle(4, 0xFFD700, alpha);
+            this.glowGraphics.lineStyle(3, 0xFFD700, alpha);
             
             if (isCircular) {
-                // Draw circular glow for round buttons
-                var radius = (bounds.width / 2) + offset;
+                var radius = Math.max(bounds.width, bounds.height) / 2 + offset;
                 this.glowGraphics.drawCircle(centerX, centerY, radius * 2);
-            } else if (isFFOption) {
-                // Draw ellipse or flexible shape for FF game objects
+            } else if (useEllipse) {
                 var radiusX = (bounds.width / 2) + offset;
                 var radiusY = (bounds.height / 2) + offset;
                 this.glowGraphics.drawEllipse(centerX, centerY, radiusX * 2, radiusY * 2);
             } else {
-                // Draw rounded rectangle glow for square/rectangular buttons
+                var cornerRadius = Math.min(bounds.width, bounds.height) * 0.15;
                 this.glowGraphics.drawRoundedRect(
                     bounds.x - offset,
                     bounds.y - offset,
                     bounds.width + (offset * 2),
                     bounds.height + (offset * 2),
-                    15
+                    cornerRadius
                 );
             }
         }
         
         // Draw inner bright outline
-        this.glowGraphics.lineStyle(3, 0xFFD700, 0.9);
+        this.glowGraphics.lineStyle(2.5, 0xFFD700, 0.95);
         if (isCircular) {
-            this.glowGraphics.drawCircle(centerX, centerY, bounds.width + 6);
-        } else if (isFFOption) {
-            var radiusX = (bounds.width / 2) + 3;
-            var radiusY = (bounds.height / 2) + 3;
+            var radius = Math.max(bounds.width, bounds.height) / 2 + 4;
+            this.glowGraphics.drawCircle(centerX, centerY, radius * 2);
+        } else if (useEllipse) {
+            var radiusX = (bounds.width / 2) + 4;
+            var radiusY = (bounds.height / 2) + 4;
             this.glowGraphics.drawEllipse(centerX, centerY, radiusX * 2, radiusY * 2);
         } else {
+            var cornerRadius = Math.min(bounds.width, bounds.height) * 0.15;
             this.glowGraphics.drawRoundedRect(
-                bounds.x - 3,
-                bounds.y - 3,
-                bounds.width + 6,
-                bounds.height + 6,
-                12
+                bounds.x - 4,
+                bounds.y - 4,
+                bounds.width + 8,
+                bounds.height + 8,
+                cornerRadius
             );
         }
         
@@ -275,6 +334,8 @@ var GameKeyboard = {
         var state = Game.state.getCurrentState();
         var action = buttonData.action;
         
+        console.log('Pressing button with action:', action);
+        
         // Call the appropriate action for the button based on its type
         try {
             if (action === 'play' && state.playButtonActions) {
@@ -291,6 +352,13 @@ var GameKeyboard = {
             }
             else if (action === 'next' && state.nextButtonActions) {
                 state.nextButtonActions.onClick.call(state);
+            }
+            else if (action === 'next' && !state.nextButtonActions) {
+                console.log('Next button clicked but no nextButtonActions found');
+                // Try to trigger the button directly
+                if (buttonData.btn.events && buttonData.btn.events.onInputUp) {
+                    buttonData.btn.events.onInputUp.dispatch(buttonData.btn, null);
+                }
             }
             else if (action === 'home' && state.homeButtonActions) {
                 state.homeButtonActions.onClick.call(state);
@@ -320,6 +388,31 @@ var GameKeyboard = {
                 if (buttonData.btn.events && buttonData.btn.events.onInputDown) {
                     buttonData.btn.events.onInputDown.dispatch(buttonData.btn);
                 }
+            }
+            // Find It & Fix It question buttons (Fix It / It's OK)
+            else if (action === 'ff-fixit' || action === 'ff-itsok') {
+                // These buttons have onInputUp callbacks, trigger them directly
+                AudioManager.playSound('bloop_sfx', state);
+                if (action === 'ff-fixit') {
+                    state.startResult(true);
+                } else {
+                    state.startResult(false);
+                }
+            }
+            // Find It & Fix It results Next button
+            else if (action === 'ff-next') {
+                // Call the button's callback directly
+                AudioManager.playSound('bloop_sfx', state);
+                state.closeResult();
+            }
+            // Protect or Pollute choice buttons
+            else if (action === 'pp-choice') {
+                // Trigger the button click
+                PPGame.chosenOptionId = buttonData.optionIndex;
+                PPGame.scoreLock = false;
+                PPGame.optionOrder = [];
+                AudioManager.playSound('bloop_sfx', state);
+                state.state.start('PPRainState');
             }
             // Handle pause menu buttons with specific actions
             else if (action === 'resume' && state.resumeButtonActions) {

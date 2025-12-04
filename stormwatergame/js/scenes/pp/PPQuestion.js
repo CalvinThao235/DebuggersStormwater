@@ -54,7 +54,9 @@ var PPQuestionState = {
     );
     this.pauseButton.scale.setTo(0.75);
 
-    // Choice Buttons
+    // Choice Buttons - Store them in an array for keyboard navigation
+    this.ppChoiceButtons = [];
+    
     var buttonWidth = WIDTH * (options.length == 3 ? 0.33 : 0.42);
     for (var i = 0; i < PPGame.optionOrder.length; ++i) {
       var onClick = function (ref) {
@@ -85,6 +87,9 @@ var PPQuestionState = {
         .to({ x: 0.95, y: 0.95 }, 600, "Linear", true)
         .yoyo(true, 0)
         .loop(true);
+      
+      // Store button for keyboard navigation
+      this.ppChoiceButtons.push(optionButton);
     }
 
     // Play music
